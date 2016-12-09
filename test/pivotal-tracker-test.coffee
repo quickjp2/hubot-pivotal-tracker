@@ -1,5 +1,6 @@
 Helper = require('hubot-test-helper')
 chai = require 'chai'
+nock = require 'nock'
 
 expect = chai.expect
 
@@ -7,10 +8,12 @@ helper = new Helper('../src/pivotal-tracker.js')
 
 describe 'pivotal-tracker', ->
   beforeEach ->
+    nock.disableNetConnect()
     @room = helper.createRoom()
 
   afterEach ->
     @room.destroy()
+    nock.cleanAll()
 
   it 'responds to hello', ->
     @room.user.say('alice', '@hubot hello').then =>
