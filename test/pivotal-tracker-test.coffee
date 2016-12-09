@@ -25,3 +25,6 @@ describe 'pivotal-tracker', ->
         ['bob', 'just wanted to say orly']
         ['hubot', 'yarly']
       ]
+
+#  it 'answers what stories need to be deleived this week', ->
+#    expect(@robot.respond).to.have.been.calledWith(//)
