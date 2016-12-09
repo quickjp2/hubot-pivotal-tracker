@@ -2,14 +2,17 @@
 #   A module to enable interactions with pivotal tracker
 #
 # Configuration:
-#   LIST_OF_ENV_VARS_TO_SET
+#   TRACKER_PROEJCT_ID - Your tracker project id
+#   TRACKER_API_TOKEN - API token for hubot to use
 #
 # Commands:
-#   hubot hello - <what the respond trigger does>
-#   orly - <what the hear trigger does>
+#   hubot create a story titled <title> - creates a new story in the icebox
+#   hubot what stories are undelivered this week - lists all stories
+#   hubot start story <story_id> - starts the story
+#   hubot finish story <story_id> - finishes the story
 #
 # Notes:
-#   <optional notes required for the script>
+#   
 #
 # Author:
 #   JP Quicksall <john.quicksall1@t-mobile.com>
