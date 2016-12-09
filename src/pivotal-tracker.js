@@ -12,7 +12,7 @@
 //   hubot finish story <story_id> - finishes the story
 //
 // Notes:
-//
+//   - Newly created stories are always placed in the backlog. This is forced by the Pivotal Tracker API
 //
 // Author:
 //   JP Quicksall <john.quicksall1@t-mobile.com>

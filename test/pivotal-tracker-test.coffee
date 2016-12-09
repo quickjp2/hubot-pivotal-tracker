@@ -16,7 +16,29 @@ describe 'pivotal-tracker', ->
     nock.cleanAll()
 
   context "create a story", ->
-
+    beforeEach ->
+      nock("https://www.pivotaltracker.com/services/v5/projects/")
+        .post("#{PROJECT_ID}/stories",{"current_state":"unstarted","estimate":1,"name":"need to make something simple"})
+        .reply 200, JSON.stringify(
+          {"kind":"story",
+          "id":123456789,
+          "project_id": PROJECT_ID,
+          "name":"need to make something simple",
+          "story_type":"feature",
+          "current_state":"unstarted",
+          "estimate":1,
+          "requested_by_id":1234567,
+          "owner_ids":[],
+          "labels":[],
+          "created_at":"2016-12-09T22:35:24Z",
+          "updated_at":"2016-12-09T22:35:24Z",
+          "url":"https://www.pivotaltracker.com/story/show/123456789"})
+    it 'responds to create a story', ->
+      @room.user.say('alice', '@hubot create me a story titled need to make something simple').then =>
+        expect(@room.messages).to.eql [
+          ['alice', '@hubot create me a story titled need to make something simple']
+          ['hubot', '@alice story created with id:123456789! Check it out at https://www.pivotaltracker.com/story/show/123456789!']
+        ]
   context "example tests", ->
     it 'responds to hello', ->
       @room.user.say('alice', '@hubot hello').then =>
