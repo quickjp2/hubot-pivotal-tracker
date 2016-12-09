@@ -5,6 +5,10 @@ nock = require 'nock'
 expect = chai.expect
 
 helper = new Helper('../src/pivotal-tracker.js')
+PROJECT_ID = 7654321
+if process.env.PROJECT_ID
+  PROJECT_ID = process.env.PROJECT_ID
+
 
 describe 'pivotal-tracker', ->
   beforeEach ->
