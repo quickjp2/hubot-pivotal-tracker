@@ -18,7 +18,7 @@
 //   JP Quicksall <john.quicksall1@t-mobile.com>
 (function(){
 // Package variables
-  var http https;
+  var http, https;
 
   http = require('http');
   https = require('https');
