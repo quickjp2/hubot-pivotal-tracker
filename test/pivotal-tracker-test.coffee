@@ -3,7 +3,7 @@ chai = require 'chai'
 
 expect = chai.expect
 
-helper = new Helper('../src/pivotal-tracker.coffee')
+helper = new Helper('../src/pivotal-tracker.js')
 
 describe 'pivotal-tracker', ->
   beforeEach ->
