@@ -34,7 +34,7 @@ describe 'pivotal-tracker', ->
           "updated_at":"2016-12-09T22:35:24Z",
           "url":"https://www.pivotaltracker.com/story/show/123456789"})
     it 'registers the create story respond listener', ->
-      expect(@robot.respond).to.have.been.calledWith(/create/)
+      expect(@robot.respond).to.have.been.calledWith(/create me[\sa]{1,3}story titled (.*\w*)/i)
 
     it 'responds to create a story', ->
       @room.user.say('alice', '@hubot create me a story titled need to make something simple').then =>
