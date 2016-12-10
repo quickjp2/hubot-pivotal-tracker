@@ -52,7 +52,7 @@
           if (err){
             robot.emit('error', err);
           } else {
-            return msg.send("" + body):
+            return msg.send("" + body);
           }
         });
     });
