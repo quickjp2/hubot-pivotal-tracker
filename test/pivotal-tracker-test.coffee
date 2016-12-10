@@ -1,6 +1,8 @@
 Helper = require('hubot-test-helper')
 chai = require 'chai'
 nock = require 'nock'
+sinon = require 'sinon'
+chai.use require 'sinon-chai'
 
 expect = chai.expect
 
@@ -14,6 +16,8 @@ describe 'pivotal-tracker', ->
   beforeEach ->
     nock.disableNetConnect()
     @room = helper.createRoom()
+    @robot =
+      respond: sinon.spy()
 
   afterEach ->
     @room.destroy()
