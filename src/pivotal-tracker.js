@@ -53,7 +53,7 @@
           if (err){
             robot.emit('error', err);
           } else {
-            return msg.send("" + body);
+            return msg.res("story created with id:" + body.id + "! Check it out at " + body.url+"!");
           }
         });
     });
