@@ -6,6 +6,7 @@
 //   TRACKER_API_TOKEN - API token for hubot to use
 //
 // Commands:
+//   hubot add me to pt using token:<API Token> - Associates the slack user with a API token
 //   hubot create a story titled <title> - creates a new story in the icebox
 //   hubot what stories are undelivered this week - lists all stories
 //   hubot start story <story_id> - starts the story
@@ -57,6 +58,11 @@
             return msg.reply("story created with id:" + response['id'] + "! Check it out at " + response['url']+"!");
           }
         });
+    });
+    robot.respond(/add me to pt using token:(.+)/i, function(msg){
+      var token = msg.match[1];
+      robot.brain.set('TrackerID'+msg.message.user.id,token)
+      return msg.reply("I've set your token to "+robot.brain.get('TrackerID'+msg.message.user.id))
     });
   }
 }).call(this);
