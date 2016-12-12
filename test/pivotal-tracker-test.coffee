@@ -26,9 +26,9 @@ describe 'pivotal-tracker', ->
 
   context "create a story", ->
     beforeEach ->
-      nock("https://www.pivotaltracker.com/services/v5/projects/")
-        .post(PROJECT_ID+"/stories",{"current_state":"unstarted","estimate":1,"name":"need to make something simple"})
-        .reply 200, JSON.stringify(
+      pt = nock('https://www.pivotaltracker.com/services/v5/projects/')
+        .post(PROJECT_ID.toString()+'/stories',{"current_state":"unstarted","estimate":1,"name":"need to make something simple"})
+        .reply(200, JSON.stringify(
           {"kind":"story",
           "id":123456789,
           "project_id": PROJECT_ID,
@@ -41,7 +41,7 @@ describe 'pivotal-tracker', ->
           "labels":[],
           "created_at":"2016-12-09T22:35:24Z",
           "updated_at":"2016-12-09T22:35:24Z",
-          "url":"https://www.pivotaltracker.com/story/show/123456789"})
+          "url":"https://www.pivotaltracker.com/story/show/123456789"}));
     it 'registers the create story respond listener', ->
       expect(@robot.respond).to.have.been.calledWith(/create me[\sa]{1,3}story titled (.*\w*)/i)
 
