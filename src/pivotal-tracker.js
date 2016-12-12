@@ -48,6 +48,7 @@
       })
       return robot.http(pivotalTrackerUrl + "projects/" + TRACKER_PROJECT_ID + "/stories")
         .header('Content-Type', 'application/json')
+        .header('Accept', 'application/json')
         .post(data)(function(err, res, body) {
           if (err){
             robot.emit('error', err);
