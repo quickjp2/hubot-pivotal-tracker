@@ -51,7 +51,7 @@
         .header('X-TrackerToken',tracker_user_token)
         .post(data)(function(err, res, body) {
           if (err){
-            robot.emit('error', err);
+            robot.logger.error(err);
           } else {
             var response = JSON.parse(body);
             return msg.reply("story created with id:" + response['id'] + "! Check it out at " + response['url']+"!");
