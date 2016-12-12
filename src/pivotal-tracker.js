@@ -41,12 +41,13 @@
     robot.respond(/create me[\sa]{1,3}story titled (.*\w*)/i, function(msg){
       var name = msg.match[1];
       var tracker_user_id = robot.brain.get('TrackerID'+msg.message.user.id)
-      data = {
-        "current_state":"unstarted",
-        "estimate":1,
-        "name":name
-      }
+      data = JSON.stringify({
+        current_state:'unstarted',
+        estimate:1,
+        name:name
+      })
       return robot.http(pivotalTrackerUrl + "projects/" + TRACKER_PROJECT_ID + "/stories")
+        .header('Content-Type', 'application/json')
         .post(data)(function(err, res, body) {
           if (err){
             robot.emit('error', err);
