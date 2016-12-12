@@ -35,7 +35,7 @@ describe 'pivotal-tracker', ->
     it 'responds to create a story', ->
       pt = nock('https://www.pivotaltracker.com/services/v5')
         .log(console.log)
-        .matchHeader('X-TrackerToken','/.*/')
+        .matchHeader('X-TrackerToken','abcdefg123hijklmnop456789')
         .post('/projects/'+PROJECT_ID.toString()+'/stories',{current_state:'unstarted',estimate:1,name:'need to make something simple'})
         .reply(200,
           {kind:"story",
@@ -52,15 +52,13 @@ describe 'pivotal-tracker', ->
           updated_at:"2016-12-09T22:35:24Z",
           url:"https://www.pivotaltracker.com/story/show/123456789"});
       @room.user.say('alice', '@hubot add me to pt using token:abcdefg123hijklmnop456789').then =>
-        expect(@room.messages).to.eql [
-          ['alice','@hubot add me to pt using token:abcdefg123hijklmnop456789']
-          ['hubot','@alice I have set your token to abcdefg123hijklmnop456789']
-        ]
-      @room.user.say('alice', '@hubot create me a story titled need to make something simple').then =>
-        expect(@room.messages).to.eql [
-          ['alice', '@hubot create me a story titled need to make something simple']
-          ['hubot', '@alice story created with id:123456789! Check it out at https://www.pivotaltracker.com/story/show/123456789!']
-        ]
+        @room.user.say('alice', '@hubot create me a story titled need to make something simple').then =>
+          expect(@room.messages).to.eql [
+            ['alice','@hubot add me to pt using token:abcdefg123hijklmnop456789']
+            ['hubot','@alice I have set your token to abcdefg123hijklmnop456789']
+            ['alice', '@hubot create me a story titled need to make something simple']
+            ['hubot', '@alice story created with id:123456789! Check it out at https://www.pivotaltracker.com/story/show/123456789!']
+          ]
 
   context "example tests", ->
     it 'responds to hello', ->
