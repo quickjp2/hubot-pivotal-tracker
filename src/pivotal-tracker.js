@@ -3,7 +3,6 @@
 //
 // Configuration:
 //   TRACKER_PROEJCT_ID - Your tracker project id
-//   TRACKER_API_TOKEN - API token for hubot to use
 //
 // Commands:
 //   hubot add me to pt using token:<API Token> - Associates the slack user with a API token
@@ -27,7 +26,6 @@
 // Global Variables
   var pivotalTrackerUrl = "https://www.pivotaltracker.com/services/v5/";
   var TRACKER_PROJECT_ID = process.env.TRACKER_PROJECT_ID;
-  var TRACKER_API_TOKEN = process.env.TRACKER_API_TOKEN;
 
 // hubot message functions
   module.exports = function(robot) {
@@ -41,7 +39,7 @@
 // Create a story
     robot.respond(/create me[\sa]{1,3}story titled (.*\w*)/i, function(msg){
       var name = msg.match[1];
-      var tracker_user_id = robot.brain.get('TrackerID'+msg.message.user.id)
+      var tracker_user_token = robot.brain.get('TrackerToken'+msg.message.user.id)
       data = JSON.stringify({
         current_state:'unstarted',
         estimate:1,
@@ -50,6 +48,7 @@
       return robot.http(pivotalTrackerUrl + "projects/" + TRACKER_PROJECT_ID + "/stories")
         .header('Content-Type', 'application/json')
         .header('Accept', 'application/json')
+        .header('X-TrackerToken',tracker_user_token)
         .post(data)(function(err, res, body) {
           if (err){
             robot.emit('error', err);
@@ -61,8 +60,8 @@
     });
     robot.respond(/add me to pt using token:(.+)/i, function(msg){
       var token = msg.match[1];
-      robot.brain.set('TrackerID'+msg.message.user.id,token)
-      return msg.reply("I've set your token to "+robot.brain.get('TrackerID'+msg.message.user.id))
+      robot.brain.set('TrackerToken'+msg.message.user.id,token)
+      return msg.reply("I have set your token to "+robot.brain.get('TrackerToken'+msg.message.user.id))
     });
   }
 }).call(this);
