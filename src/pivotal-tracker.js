@@ -6,7 +6,7 @@
 //
 // Commands:
 //   hubot add me to pt using token:<API Token> - Associates the slack user with a API token
-//   hubot create a story titled <title> - creates a new story in the icebox
+//   hubot create me a story titled <title> - creates a new story in the icebox
 //   hubot what stories are undelivered this week - lists all stories
 //   hubot start story <story_id> - starts the story
 //   hubot finish story <story_id> - finishes the story
