@@ -42,10 +42,9 @@
       var name = msg.match[1];
       var tracker_user_id = robot.brain.get('TrackerID'+msg.message.user.id)
       data = {
-        "name":name,
-        "estimate":1,
         "current_state":"unstarted",
-        "requested_by_id":tracker_user_id
+        "estimate":1,
+        "name":name
       }
       return robot.http(pivotalTrackerUrl + "projects/" + TRACKER_PROJECT_ID + "/stories")
         .post(data)(function(err, res, body) {
