@@ -25,7 +25,7 @@
 
 // Global Variables
   var pivotalTrackerUrl = "https://www.pivotaltracker.com/services/v5/";
-  var TRACKER_PROEJCT_ID = process.env.TRACKER_PROEJCT_ID;
+  var TRACKER_PROJECT_ID = process.env.TRACKER_PROJECT_ID;
   var TRACKER_API_TOKEN = process.env.TRACKER_API_TOKEN;
 
 // hubot message functions
@@ -47,7 +47,7 @@
         "current_state":"unstarted",
         "requested_by_id":tracker_user_id
       }
-      return robot.http(pivotalTrackerUrl + "projects/" + TRACKER_PROEJCT_ID + "/stories")
+      return robot.http(pivotalTrackerUrl + "projects/" + TRACKER_PROJECT_ID + "/stories")
         .post(data)(function(err, res, body) {
           if (err){
             robot.emit('error', err);
