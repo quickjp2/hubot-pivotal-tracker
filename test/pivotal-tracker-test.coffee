@@ -11,6 +11,7 @@ PROJECT_ID = 7654321
 if process.env.PROJECT_ID
   PROJECT_ID = process.env.PROJECT_ID
 
+process.env.TRACKER_PROJECT_ID = PROJECT_ID
 
 describe 'pivotal-tracker', ->
   beforeEach ->
@@ -26,7 +27,7 @@ describe 'pivotal-tracker', ->
   context "create a story", ->
     beforeEach ->
       nock("https://www.pivotaltracker.com/services/v5/projects/")
-        .post("#{PROJECT_ID}/stories",{"current_state":"unstarted","estimate":1,"name":"need to make something simple"})
+        .post(PROJECT_ID+"/stories",{"current_state":"unstarted","estimate":1,"name":"need to make something simple"})
         .reply 200, JSON.stringify(
           {"kind":"story",
           "id":123456789,
