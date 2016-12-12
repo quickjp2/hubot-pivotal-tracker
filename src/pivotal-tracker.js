@@ -45,6 +45,7 @@
         estimate:1,
         name:name
       })
+      robot.send({room: msg.envelope.user.name}, "Using "+tracker_user_token+" as your token...");
       return robot.http(pivotalTrackerUrl + "projects/" + TRACKER_PROJECT_ID + "/stories")
         .header('Content-Type', 'application/json')
         .header('Accept', 'application/json')
