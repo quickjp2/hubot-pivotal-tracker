@@ -13,7 +13,7 @@
 //   hubot create me a story titled <title> - creates a new story in the icebox
 //   hubot what stories are undelivered this week - lists all stories
 //   hubot start story <story_id> - starts the story
-//   hubot finish story <story_id> - finishes the story
+//   hubot deliver story <story_id> - finishes the story
 //
 // Notes:
 //   - Newly created stories are always placed in the backlog. This is forced by the Pivotal Tracker API
@@ -70,6 +70,29 @@
       var tracker_user_token = robot.brain.get('TrackerToken'+msg.message.user.id)
       data = JSON.stringify({
         current_state:'started'
+      })
+      // robot.send({room: msg.envelope.user.id}, "Using "+tracker_user_token+" as your token...");
+      var url = pivotalTrackerUrl + "projects/" + robot.brain.get('TrackerTeamID'+msg.message.user.id) +
+        "/stories/" + storyID
+      robot.logger.debug(url)
+      return robot.http(url)
+        .header('Content-Type', 'application/json')
+        .header('X-TrackerToken',tracker_user_token)
+        .put(data)(function(err, res, body) {
+          if (err){
+            robot.logger.error(err);
+          } else {
+            var response = JSON.parse(body);
+            robot.logger.debug(body)
+            return msg.reply("story " + response['id'] + "is now "+response['current_state']+"!");
+          }
+        });
+    });
+    robot.respond(/deliver story (\d+)/i, function(msg){
+      var storyID = msg.match[1];
+      var tracker_user_token = robot.brain.get('TrackerToken'+msg.message.user.id)
+      data = JSON.stringify({
+        current_state:'delivered'
       })
       // robot.send({room: msg.envelope.user.id}, "Using "+tracker_user_token+" as your token...");
       var url = pivotalTrackerUrl + "projects/" + robot.brain.get('TrackerTeamID'+msg.message.user.id) +
