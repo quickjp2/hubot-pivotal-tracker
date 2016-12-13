@@ -57,6 +57,7 @@ describe 'pivotal-tracker', ->
             ['alice','@hubot add me to pt using token:abcdefg123hijklmnop456789']
             ['hubot','@alice I have set your token to abcdefg123hijklmnop456789']
             ['alice', '@hubot create me a story titled need to make something simple']
+            ['hubot', 'Using abcdefg123hijklmnop456789 as your token...']
             ['hubot', '@alice story created with id:123456789! Check it out at https://www.pivotaltracker.com/story/show/123456789!']
           ]
 
