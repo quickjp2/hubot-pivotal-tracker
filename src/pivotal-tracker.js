@@ -6,6 +6,9 @@
 //   TRACKER_URL - The url to the API version desired
 //
 // Commands:
+//   hubot set my pt team to id:<PT_team_id> - Associates the slack user with a PT team
+//   hubot what is my pt team id? - Retrieves the pt team id you are set to use (DM)
+//   hubot what is my pt token? - Retrieves the api token hubot has on file for you (DM)
 //   hubot add me to pt using token:<API Token> - Associates the slack user with a API token
 //   hubot create me a story titled <title> - creates a new story in the icebox
 //   hubot what stories are undelivered this week - lists all stories
