@@ -46,7 +46,7 @@
         estimate:1,
         name:name
       })
-      robot.send({room: msg.envelope.user.id}, "Using "+tracker_user_token+" as your token...");
+      // robot.send({room: msg.envelope.user.id}, "Using "+tracker_user_token+" as your token...");
       var url = pivotalTrackerUrl + "projects/" + TRACKER_PROJECT_ID.toString() + "/stories"
       robot.logger.debug(url)
       return robot.http(url)
@@ -65,7 +65,20 @@
     robot.respond(/add me to pt using token:(.+)/i, function(msg){
       var token = msg.match[1];
       robot.brain.set('TrackerToken'+msg.message.user.id,token)
-      return msg.reply("I have set your token to "+robot.brain.get('TrackerToken'+msg.message.user.id))
+      return robot.send({room: msg.envelope.user.id}, "I have set your token to "+robot.brain.get('TrackerToken'+msg.message.user.id));
+    });
+    robot.respond(/what is my pt token?/i, function(msg){
+      var tracker_user_token = robot.brain.get('TrackerToken'+msg.message.user.id)
+      return robot.send({room: msg.envelope.user.id}, "Using "+tracker_user_token+" as your token...");
+    });
+    robot.respond(/what is my pt team id?/i, function(msg){
+      var tracker_user_token = robot.brain.get('TrackerTeamID'+msg.message.user.id)
+      return robot.send({room: msg.envelope.user.id}, "Using "+tracker_user_token+" as your token...");
+    });
+    robot.respond(/set my pt team to id:(.+)/i, function(msg){
+      var token = msg.match[1];
+      robot.brain.set('TrackerTeamID'+msg.message.user.id,token)
+      return robot.send({room: msg.envelope.user.id}, "I have set your pt team to "+robot.brain.get('TrackerTeamID'+msg.message.user.id));
     });
   }
 }).call(this);
