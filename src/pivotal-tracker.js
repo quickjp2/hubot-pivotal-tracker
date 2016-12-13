@@ -9,7 +9,7 @@
 //   hubot set my pt team to id:<PT_team_id> - Associates the slack user with a PT team
 //   hubot what is my pt team id? - Retrieves the pt team id you are set to use (DM)
 //   hubot what is my pt token? - Retrieves the api token hubot has on file for you (DM)
-//   hubot add me to pt using token:<API Token> - Associates the slack user with a API token
+//   hubot set my pt api token to:<API Token> - Associates the slack user with a API token
 //   hubot create me a story titled <title> - creates a new story in the icebox
 //   hubot what stories are undelivered this week - lists all stories
 //   hubot start story <story_id> - starts the story
@@ -50,7 +50,7 @@
         name:name
       })
       // robot.send({room: msg.envelope.user.id}, "Using "+tracker_user_token+" as your token...");
-      var url = pivotalTrackerUrl + "projects/" + TRACKER_PROJECT_ID.toString() + "/stories"
+      var url = pivotalTrackerUrl + "projects/" + robot.brain.get('TrackerTeamID'+msg.message.user.id) + "/stories"
       robot.logger.debug(url)
       return robot.http(url)
         .header('Content-Type', 'application/json')
@@ -65,7 +65,39 @@
           }
         });
     });
-    robot.respond(/add me to pt using token:(.+)/i, function(msg){
+    robot.respond(/start story (\d+)/i, function(msg){
+      var storyID = msg.match[1];
+      var tracker_user_token = robot.brain.get('TrackerToken'+msg.message.user.id)
+      data = JSON.stringify({
+        current_state:'started'
+      })
+      // robot.send({room: msg.envelope.user.id}, "Using "+tracker_user_token+" as your token...");
+      var url = pivotalTrackerUrl + "projects/" + robot.brain.get('TrackerTeamID'+msg.message.user.id) +
+        "/stories/" + storyID
+      robot.logger.debug(url)
+      return robot.http(url)
+        .header('Content-Type', 'application/json')
+        .header('X-TrackerToken',tracker_user_token)
+        .put(data)(function(err, res, body) {
+          if (err){
+            robot.logger.error(err);
+          } else {
+            var response = JSON.parse(body);
+            robot.logger.debug(body)
+            return msg.reply("story " + response['id'] + "is now "+response['current_state']+"!");
+          }
+        });
+    });
+    robot.respond(/add me to pt team id:\s?(\w+) using token:\s?(\w+)/i, function(msg){
+      var ptid = msg.match[1];
+      var token = msg.match[2];
+      robot.brain.set('TrackerTeamID'+msg.message.user.id,ptid)
+      robot.brain.set('TrackerToken'+msg.message.user.id,token)
+      return robot.send({room: msg.envelope.user.id}, "I have set your token to "+
+        robot.brain.get('TrackerToken'+msg.message.user.id)+". Welcome to PT team "+
+        robot.brain.get('TrackerTeamID'+msg.message.user.id));
+    });
+    robot.respond(/set my pt api token to:\s?(.+)/i, function(msg){
       var token = msg.match[1];
       robot.brain.set('TrackerToken'+msg.message.user.id,token)
       return robot.send({room: msg.envelope.user.id}, "I have set your token to "+robot.brain.get('TrackerToken'+msg.message.user.id));

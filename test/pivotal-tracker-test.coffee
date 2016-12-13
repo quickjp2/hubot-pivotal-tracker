@@ -25,14 +25,7 @@ describe 'pivotal-tracker', ->
     nock.cleanAll()
 
   context "create a story", ->
-    it 'sets an API token', ->
-      @room.user.say('alice', '@hubot add me to pt using token:abcdefg123hijklmnop456789').then =>
-        expect(@room.messages).to.eql [
-          ['alice','@hubot add me to pt using token:abcdefg123hijklmnop456789']
-          ['hubot','@alice I have set your token to abcdefg123hijklmnop456789']
-        ]
-
-    it 'responds to create a story', ->
+    beforeEach ->
       pt = nock('https://www.pivotaltracker.com/services/v5')
         .log(console.log)
         .matchHeader('X-TrackerToken','abcdefg123hijklmnop456789')
@@ -51,13 +44,25 @@ describe 'pivotal-tracker', ->
           created_at:"2016-12-09T22:35:24Z",
           updated_at:"2016-12-09T22:35:24Z",
           url:"https://www.pivotaltracker.com/story/show/123456789"});
-      @room.user.say('alice', '@hubot add me to pt using token:abcdefg123hijklmnop456789').then =>
+    it 'sets an API token', ->
+      @room.user.say('alice', '@hubot set my pt api token to:abcdefg123hijklmnop456789').then =>
+        expect(@room.messages).to.eql [
+          ['alice','@hubot set my pt api token to:abcdefg123hijklmnop456789']
+          ['hubot','I have set your token to abcdefg123hijklmnop456789']
+        ]
+    it 'associates a user to a pt team', ->
+      @room.user.say('alice', '@hubot set my pt team to id:'+PROJECT_ID).then =>
+        expect(@room.messages).to.eql [
+          ['alice', '@hubot set my pt team to id:'+PROJECT_ID]
+          ['hubot', 'I have set your pt team to '+PROJECT_ID]
+        ]
+    it 'responds to create a story after adding a user', ->
+      @room.user.say('alice', '@hubot add me to pt team id: '+PROJECT_ID+' using token: abcdefg123hijklmnop456789').then =>
         @room.user.say('alice', '@hubot create me a story titled need to make something simple').then =>
           expect(@room.messages).to.eql [
-            ['alice','@hubot add me to pt using token:abcdefg123hijklmnop456789']
-            ['hubot','@alice I have set your token to abcdefg123hijklmnop456789']
+            ['alice', '@hubot add me to pt team id: '+PROJECT_ID+' using token: abcdefg123hijklmnop456789']
+            ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to PT team '+PROJECT_ID]
             ['alice', '@hubot create me a story titled need to make something simple']
-            ['hubot', 'Using abcdefg123hijklmnop456789 as your token...']
             ['hubot', '@alice story created with id:123456789! Check it out at https://www.pivotaltracker.com/story/show/123456789!']
           ]
 
