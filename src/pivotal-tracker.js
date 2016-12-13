@@ -45,7 +45,7 @@
         estimate:1,
         name:name
       })
-      robot.send({room: msg.envelope.user.name}, "Using "+tracker_user_token+" as your token...");
+      robot.send({room: msg.envelope.user.id}, "Using "+tracker_user_token+" as your token...");
       return robot.http(pivotalTrackerUrl + "projects/" + TRACKER_PROJECT_ID + "/stories")
         .header('Content-Type', 'application/json')
         .header('Accept', 'application/json')
@@ -55,6 +55,7 @@
             robot.logger.error(err);
           } else {
             var response = JSON.parse(body);
+            robot.logger.info(body)
             return msg.reply("story created with id:" + response['id'] + "! Check it out at " + response['url']+"!");
           }
         });
