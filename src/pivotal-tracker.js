@@ -3,6 +3,7 @@
 //
 // Configuration:
 //   TRACKER_PROEJCT_ID - Your tracker project id
+//   TRACKER_URL - The url to the API version desired
 //
 // Commands:
 //   hubot add me to pt using token:<API Token> - Associates the slack user with a API token
@@ -24,7 +25,7 @@
   https = require('https');
 
 // Global Variables
-  var pivotalTrackerUrl = "https://www.pivotaltracker.com/services/v5/";
+  var pivotalTrackerUrl = process.env.TRACKER_URL;
   var TRACKER_PROJECT_ID = process.env.TRACKER_PROJECT_ID;
 
 // hubot message functions
@@ -46,16 +47,17 @@
         name:name
       })
       robot.send({room: msg.envelope.user.id}, "Using "+tracker_user_token+" as your token...");
-      return robot.http(pivotalTrackerUrl + "projects/" + TRACKER_PROJECT_ID + "/stories")
+      var url = pivotalTrackerUrl + "projects/" + TRACKER_PROJECT_ID + "/stories"
+      robot.logger.debug(url)
+      return robot.http(url)
         .header('Content-Type', 'application/json')
-        .header('Accept', 'application/json')
         .header('X-TrackerToken',tracker_user_token)
         .post(data)(function(err, res, body) {
           if (err){
             robot.logger.error(err);
           } else {
             var response = JSON.parse(body);
-            robot.logger.info(body)
+            robot.logger.debug(body)
             return msg.reply("story created with id:" + response['id'] + "! Check it out at " + response['url']+"!");
           }
         });
