@@ -47,7 +47,7 @@
         name:name
       })
       robot.send({room: msg.envelope.user.id}, "Using "+tracker_user_token+" as your token...");
-      var url = pivotalTrackerUrl + "projects/" + TRACKER_PROJECT_ID + "/stories"
+      var url = pivotalTrackerUrl + "projects/" + TRACKER_PROJECT_ID.toString() + "/stories"
       robot.logger.debug(url)
       return robot.http(url)
         .header('Content-Type', 'application/json')
