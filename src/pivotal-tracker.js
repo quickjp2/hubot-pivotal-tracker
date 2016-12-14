@@ -14,6 +14,7 @@
 //   hubot what stories are undelivered this week - lists all stories (FUTURE)
 //   hubot start story <story_id> - starts the story
 //   hubot deliver story <story_id> - finishes the story
+//   hubot add me to pt team id:<PT_team_id> using token:<API_Token> - Associates the user with both a team and token
 //
 // Notes:
 //   - Newly created stories are always placed in the backlog. This is forced by the Pivotal Tracker API
@@ -127,7 +128,7 @@
     });
     robot.respond(/what is my pt token?/i, function(msg){
       var tracker_user_token = robot.brain.get('TrackerToken'+msg.message.user.id)
-      return robot.send({room: msg.envelope.user.id}, "Using "+tracker_user_token+" as your token...");
+      return robot.send({room: msg.envelope.user.id}, "Using "+tracker_user_token+" as your team id...");
     });
     robot.respond(/what is my pt team id?/i, function(msg){
       var tracker_user_token = robot.brain.get('TrackerTeamID'+msg.message.user.id)
