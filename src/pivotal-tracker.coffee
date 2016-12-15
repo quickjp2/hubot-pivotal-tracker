@@ -86,11 +86,11 @@ module.exports = (robot) ->
       .header('X-TrackerToken',token)
       .put(data) (err, res, body) ->
         if err
-          robbot.logger.debug err
+          robot.logger.debug err
         else
           response = JSON.parse body
           robot.logger.debug body
-          msg.reply "story" + response['id'] + "is now "+ response['current_state']
+          msg.reply "story " + response['id'] + " is now "+ response['current_state']
 
   robot.respond /deliver story (\d+)/i, (msg) ->
     storyID = msg.match[1]
@@ -106,11 +106,11 @@ module.exports = (robot) ->
       .header('X-TrackerToken',token)
       .put(data) (err, res, body) ->
         if err
-          robbot.logger.debug err
+          robot.logger.debug err
         else
           response = JSON.parse body
           robot.logger.debug body
-          msg.reply "story" + response['id'] + "is now "+ response['current_state']
+          msg.reply "story " + response['id'] + " is now "+ response['current_state']
 
   robot.respond /create me[\sa]{1,3}story titled (.*\w*)/i, (msg) ->
     name = msg.match[1]
