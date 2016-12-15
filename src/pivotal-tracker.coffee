@@ -2,7 +2,6 @@
 #   A module to enable interactions with pivotal tracker
 #
 # Configuration:
-#   TRACKER_PROEJCT_ID - Your tracker project id
 #   TRACKER_URL - The url to the API version desired
 #
 # Commands:
