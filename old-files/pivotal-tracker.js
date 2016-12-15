@@ -117,27 +117,125 @@
       var token = msg.match[2];
       robot.brain.set('TrackerTeamID'+msg.message.user.id,ptid)
       robot.brain.set('TrackerToken'+msg.message.user.id,token)
-      return robot.send({room: msg.envelope.user.id}, "I have set your token to "+
-        robot.brain.get('TrackerToken'+msg.message.user.id)+". Welcome to PT team "+
-        robot.brain.get('TrackerTeamID'+msg.message.user.id));
+      // return robot.http(pivotalTrackerUrl+"me")
+      //   .header('Content-Type', 'application/json')
+      //   .header('X-TrackerToken',token)
+      //   .get()(function(err,res,body){
+      //     if (err){
+      //       robot.logger.error(err);
+      //     } else {
+      //       var response = JSON.parse(body);
+      //       robot.logger.debug(body);
+      //       if ( ptid == null){
+      //         robot.logger.debug("Check 1..."+response['id']);
+      //         PTUserID = response['id'];
+      //         robot.brain.set('TrackerID'+slackUserID,PTUserID)
+      //       } else {
+      //         for (project of repsonse['projects']){
+      //           if (project['project_id'] == trackerTeamID){
+      //             robot.logger.debug("Check 2..."+response['id']);
+      //             PTUserID = response['id'];
+      //             robot.brain.set('TrackerID'+slackUserID,PTUserID)
+      //           }
+      //         }
+      //         robot.logger.debug("Check 3..."+response['id']);
+      //         PTUserID = response['id'];
+      //         robot.brain.set('TrackerID'+slackUserID,PTUserID)
+      //       }
+      //   }.then(function(){
+      //     robot.send({room: msg.envelope.user.id}, "I have set your token to "+
+      //       robot.brain.get('TrackerToken'+msg.message.user.id)+". Welcome to PT team "+
+      //       robot.brain.get('TrackerTeamID'+msg.message.user.id)+"! Your PT ID is "+
+      //       robot.brain.get('TrackerID'+msg.message.user.id));
+      //   )}});
     });
     robot.respond(/set my pt api token to:\s?(.+)/i, function(msg){
       var token = msg.match[1];
-      robot.brain.set('TrackerToken'+msg.message.user.id,token)
-      return robot.send({room: msg.envelope.user.id}, "I have set your token to "+robot.brain.get('TrackerToken'+msg.message.user.id));
+      var slackUserID = msg.message.user.id;
+      var PTUserID;
+      var trackerTeamID = robot.brain.get('TrackerTeamID'+slackUserID);
+      robot.brain.set('TrackerToken'+slackUserID,token);
+      robot.http(pivotalTrackerUrl+"me")
+        .header('Content-Type', 'application/json')
+        .header('X-TrackerToken',token)
+        .get()(function(err, res, body) {
+          if (err){
+            robot.logger.error(err);
+          } else {
+            var response = JSON.parse(body);
+            robot.logger.debug(body);
+            if ( trackerTeamID == null){
+              robot.logger.debug("Check 1..."+response['id']);
+              PTUserID = response['id'];
+              robot.brain.set('TrackerID'+slackUserID,PTUserID)
+              return robot.send({room: slackUserID}, "I have set your token to "+
+                robot.brain.get('TrackerToken'+slackUserID)+". Your PT ID is "+
+                robot.brain.get('TrackerID'+slackUserID));
+            } else {
+              for (project of repsonse['projects']){
+                if (project['project_id'] == trackerTeamID){
+                  robot.logger.debug("Check 2..."+response['id']);
+                  PTUserID = response['id'];
+                  robot.brain.set('TrackerID'+slackUserID,PTUserID)
+                  return robot.send({room: slackUserID}, "I have set your token to "+
+                    robot.brain.get('TrackerToken'+slackUserID)+". Your PT ID is "+
+                    robot.brain.get('TrackerID'+slackUserID));
+                }
+              }
+              robot.logger.debug("Check 3..."+response['id']);
+              PTUserID = response['id'];
+              robot.brain.set('TrackerID'+slackUserID,PTUserID)
+              return robot.send({room: slackUserID}, "I have set your token to "+
+                robot.brain.get('TrackerToken'+slackUserID)+". Your PT ID is "+
+                robot.brain.get('TrackerID'+slackUserID));
+            }
+          }
+        });
     });
     robot.respond(/what is my pt token?/i, function(msg){
       var tracker_user_token = robot.brain.get('TrackerToken'+msg.message.user.id)
       return robot.send({room: msg.envelope.user.id}, "Using "+tracker_user_token+" as your team id...");
     });
-    robot.respond(/what is my pt team id?/i, function(msg){
+    robot.respond(/what is my pt project id?/i, function(msg){
       var tracker_user_token = robot.brain.get('TrackerTeamID'+msg.message.user.id)
       return robot.send({room: msg.envelope.user.id}, "Using "+tracker_user_token+" as your token...");
     });
-    robot.respond(/set my pt team to id:(.+)/i, function(msg){
+    robot.respond(/set my pt project to id:(\d+)/i, function(msg){
       var token = msg.match[1];
       robot.brain.set('TrackerTeamID'+msg.message.user.id,token)
-      return robot.send({room: msg.envelope.user.id}, "I have set your pt team to "+robot.brain.get('TrackerTeamID'+msg.message.user.id));
+      return robot.send({room: msg.envelope.user.id}, "I have set your pt project to "+robot.brain.get('TrackerTeamID'+msg.message.user.id));
     });
   }
+  var fetchPTUserID = function(robot, slackUserID) {
+    var trackerTeamID = robot.brain.get('TrackerTeamID'+slackUserID);
+    var trackerToken = robot.brain.get('TrackerToken'+slackUserID);
+    if ( trackerToken == null){
+      return null;
+    } else {
+      robot.logger.debug(pivotalTrackerUrl)
+      return robot.http(pivotalTrackerUrl+"me")
+        .header('Content-Type', 'application/json')
+        .header('X-TrackerToken',trackerToken)
+        .get()(function(err, res, body) {
+          if (err){
+            robot.logger.error(err);
+          } else {
+            var response = JSON.parse(body);
+            robot.logger.debug(body);
+            if ( trackerTeamID == null){
+              robot.logger.debug(response['id']);
+              return (response['id']);
+            } else {
+              // for (project of repsonse['projects']){
+              //   if (project['project_id'] == trackerTeamID){
+              //     return project['id'];
+              //   }
+              // }
+              robot.logger.debug(response['id']);
+              return (response['id']);
+            }
+          }
+        });
+    }
+  };
 }).call(this);
