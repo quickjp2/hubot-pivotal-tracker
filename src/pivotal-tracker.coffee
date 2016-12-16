@@ -13,7 +13,7 @@
 #   hubot what stories are undelivered this week - lists all stories (FUTURE)
 #   hubot start story <story_id> - starts the story
 #   hubot deliver story <story_id> - finishes the story
-#   hubot add me to pt team id:<PT_team_id> using token:<API_Token> - Associates the user with both a team and token
+#   hubot add me to pt project id:<PT_team_id> using token:<API_Token> - Associates the user with both a team and token
 #
 # Notes:
 #   - Newly created stories are always placed in the backlog. This is forced by the Pivotal Tracker API
@@ -33,6 +33,26 @@ module.exports = (robot) ->
   robot.hear /orly/i, (msg) ->
     msg.send "yarly"
 
+# Log my PT user ID
+  robot.respond /fetch my pt id/i, (msg) ->
+    tracker_user_token = robot.brain.get 'TrackerToken'+msg.message.user.id
+    slackUserID = msg.message.user.id
+    if tracker_user_token == null
+      robot.send {room: msg.message.user.id}, "well this is awkward...you don't have a token set yet..."
+    else
+      robot.http(pivotalTrackerUrl+"me")
+        .header('Content-Type', 'application/json')
+        .header('X-TrackerToken',token)
+        .get() (err, res, body) ->
+          if err
+            robot.logger.debug err
+          else
+            response = JSON.parse body
+            robot.logger.debug body
+            PTUserID = response['id'];
+            robot.brain.set('TrackerID'+slackUserID,PTUserID)
+            robot.send {room: msg.message.user.id}, "Your ID is set to "+
+              robot.brain.get('TrackerID'+slackUserID,PTUserID)
 # Get and set your PT api token
   robot.respond /what is my pt token?/i, (msg) ->
     tracker_user_token = robot.brain.get 'TrackerToken'+msg.message.user.id
@@ -42,9 +62,20 @@ module.exports = (robot) ->
     token = msg.match[1]
     slackUserID = msg.message.user.id
     robot.brain.set 'TrackerToken'+slackUserID, token
-    robot.send {room: slackUserID}, "I have set your token to "+
-      robot.brain.get('TrackerToken'+slackUserID)+". Your PT ID is 101"# +
-#       robot.brain.get('TrackerID'+slackUserID)
+    robot.http(pivotalTrackerUrl+"me")
+      .header('Content-Type', 'application/json')
+      .header('X-TrackerToken',token)
+      .get() (err, res, body) ->
+        if err
+          robot.logger.debug err
+        else
+          response = JSON.parse body
+          robot.logger.debug body
+          PTUserID = response['id'];
+          robot.brain.set('TrackerID'+slackUserID,PTUserID)
+          robot.send {room: slackUserID}, "I have set your token to "+
+            robot.brain.get('TrackerToken'+slackUserID)+". Your PT ID is "+
+            robot.brain.get('TrackerID'+slackUserID)
 
 # Get and set your PT Project ID
   robot.respond /what is my pt project id?/i, (msg) ->
@@ -65,10 +96,21 @@ module.exports = (robot) ->
     slackUserID = msg.message.user.id
     robot.brain.set 'TrackerProjectID'+slackUserID, tracker_projectID
     robot.brain.set 'TrackerToken'+slackUserID, token
-    robot.send {room: slackUserID}, "I have set your token to "+
-      robot.brain.get('TrackerToken'+msg.message.user.id)+". Welcome to pt project "+
-      robot.brain.get('TrackerProjectID'+msg.message.user.id)+"! Your pt ID is 101"#+
-#      robot.brain.get('TrackerID'+msg.message.user.id)
+    robot.http(pivotalTrackerUrl+"me")
+      .header('Content-Type', 'application/json')
+      .header('X-TrackerToken',token)
+      .get() (err, res, body) ->
+        if err
+          robot.logger.debug err
+        else
+          response = JSON.parse body
+          robot.logger.debug body
+          PTUserID = response['id'];
+          robot.brain.set('TrackerID'+slackUserID,PTUserID)
+          robot.send {room: slackUserID}, "I have set your token to "+
+            robot.brain.get('TrackerToken'+msg.message.user.id)+". Welcome to pt project "+
+            robot.brain.get('TrackerProjectID'+msg.message.user.id)+"! Your pt ID is "+
+            robot.brain.get('TrackerID'+msg.message.user.id)
 
 # Oh the stories!!!!
   robot.respond /start story (\d+)/i, (msg) ->
@@ -134,3 +176,6 @@ module.exports = (robot) ->
           robot.logger.debug body
           msg.reply "story created with id:"+response['id']+
             "! Check it out at "+response['url']+"!"
+
+  # Let's do something cool and output the stories
+  robot.respond /show me my stories/i, (msg) ->
