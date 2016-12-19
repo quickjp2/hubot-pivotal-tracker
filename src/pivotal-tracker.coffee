@@ -37,7 +37,7 @@ module.exports = (robot) ->
 
 # Log my PT user ID
   robot.respond /fetch my pt id/i, (msg) ->
-    tracker_user_token = robot.brain.get 'TrackerToken'+msg.message.user.id
+    token = robot.brain.get 'TrackerToken'+msg.message.user.id
     slackUserID = msg.message.user.id
     if tracker_user_token == null
       robot.send {room: msg.message.user.id}, "well this is awkward...you don't have a token set yet..."
