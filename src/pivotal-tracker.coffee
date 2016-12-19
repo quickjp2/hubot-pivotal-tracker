@@ -39,7 +39,7 @@ module.exports = (robot) ->
   robot.respond /fetch my pt id/i, (msg) ->
     token = robot.brain.get 'TrackerToken'+msg.message.user.id
     slackUserID = msg.message.user.id
-    if tracker_user_token == null
+    if token == null
       robot.send {room: msg.message.user.id}, "well this is awkward...you don't have a token set yet..."
     else
       robot.http(pivotalTrackerUrl+"me")
