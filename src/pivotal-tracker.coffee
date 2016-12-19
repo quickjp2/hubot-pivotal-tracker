@@ -5,14 +5,16 @@
 #   TRACKER_URL - The url to the API version desired
 #
 # Commands:
-#   hubot set my pt team to id:<PT_team_id> - Associates the slack user with a PT team
-#   hubot what is my pt team id? - Retrieves the pt team id you are set to use (DM)
+#   hubot set my pt project to id:<PT_project_id> - Associates the slack user with a PT project
+#   hubot what is my pt project id? - Retrieves the pt project id you are set to use (DM)
 #   hubot what is my pt token? - Retrieves the api token hubot has on file for you (DM)
 #   hubot set my pt api token to:<API Token> - Associates the slack user with a API token
 #   hubot create me a story titled <title> - creates a new story in the icebox
 #   hubot what stories are undelivered this week - lists all stories (FUTURE)
 #   hubot start story <story_id> - starts the story
 #   hubot deliver story <story_id> - finishes the story
+#   hubot fetch my pt id - send you your pt id (DM)
+#   hubot show me my stories! - lists the stories assigned to you (DM)
 #   hubot add me to pt project id:<PT_team_id> using token:<API_Token> - Associates the user with both a team and token
 #
 # Notes:
@@ -178,4 +180,25 @@ module.exports = (robot) ->
             "! Check it out at "+response['url']+"!"
 
   # Let's do something cool and output the stories
-  robot.respond /show me my stories/i, (msg) ->
+  robot.respond /show me my stories[!]?/i, (msg) ->
+    slackUserID = msg.message.user.id
+    token = robot.brain.get 'TrackerToken'+slackUserID
+    tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
+    url = pivotalTrackerUrl+"projects/"+tracker_projectID+"/stories"
+    my_stories = {}
+    i = 1
+    robot.logger.debug(url)
+    robot.http(url+"?date_format=millis&filter=current_state:unstarted,started,finished,delivered")
+      .header('Content-Type', 'application/json')
+      .header('X-TrackerToken',token)
+      .get() (err, res, body) ->
+        if err
+          robot.logger.error err
+        else
+          stories = JSON.parse body
+          robot.logger.debug body
+          for story in stories
+            if robot.brain.get('TrackerID'+slackUserID) in story['owner_ids']
+              my_stories[i] = story['name']+": ID: "+story['id']+", State: "+story['current_state']
+              i = i + 1
+          robot.send {room:slackUserID}, my_stories

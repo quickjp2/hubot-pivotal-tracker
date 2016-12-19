@@ -80,6 +80,18 @@ describe 'pivotal-tracker', ->
         {kind:"story",
         id:123456789,
         current_state:"delivered"})
+      .get('/projects/'+PROJECT_ID+'/stories?date_format=millis&filter=current_state%3Aunstarted%2Cstarted%2Cfinished%2Cdelivered')
+      .reply(200,
+        [{kind:"story",
+        id:123456789,
+        name:"need to make something simple",
+        current_state:"started",
+        owner_ids:[101]},
+        {kind:"story",
+        id:123456781,
+        name:"need to make something simple 2",
+        current_state:"unstarted",
+        owner_ids:[102]}])
     @room = helper.createRoom()
     @robot =
       respond: sinon.spy()
@@ -152,6 +164,15 @@ describe 'pivotal-tracker', ->
             ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
             ['alice', '@hubot deliver story 123456789']
             ['hubot', '@alice story 123456789 is now delivered']
+          ]
+    it 'shows you your stories', ->
+      @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
+        @room.user.say('alice', '@hubot show me my stories!').then =>
+          expect(@room.messages).to.eql [
+            ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
+            ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
+            ['alice', '@hubot show me my stories!']
+            ['hubot', {"1": "need to make something simple: ID: 123456789, State: started"}]
           ]
 
   context "example tests", ->
