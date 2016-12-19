@@ -120,7 +120,8 @@ module.exports = (robot) ->
     slackUserID = msg.message.user.id
     tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
     token = robot.brain.get 'TrackerToken'+slackUserID
-    data = JSON.stringify { current_state: 'started'}
+    robot.brain.get('TrackerID'+msg.message.user.id)
+    data = JSON.stringify { current_state: 'started', owner_ids: [robot.brain.get('TrackerID'+slackUserID)]}
     url = pivotalTrackerUrl+"projects/"+tracker_projectID+"/stories/"+storyID
 
     robot.logger.debug url
