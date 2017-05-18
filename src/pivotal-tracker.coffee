@@ -223,4 +223,4 @@ module.exports = (robot) ->
                       i = i + 1
                   if requests == 0
                     robot.logger.debug my_stories
-                    msg.sendPrivate JSON.stringify(my_stories, null, 1)
+                    msg.send { room: slackUserID }, JSON.stringify(my_stories, null, 1)
