@@ -172,7 +172,7 @@ describe 'pivotal-tracker', ->
             ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
             ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
             ['alice', '@hubot show me my stories!']
-            ['hubot', {"1": "need to make something simple: ID: 123456789, State: started"}]
+            ['hubot', '{\n \"1\": \"need to make something simple: ID: 123456789, State: started\"\n}']
           ]
 
   context "example tests", ->
