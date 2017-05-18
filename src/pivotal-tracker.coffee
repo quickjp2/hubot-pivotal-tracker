@@ -107,7 +107,7 @@ module.exports = (robot) ->
         else
           response = JSON.parse body
           robot.logger.debug body
-          PTUserID = response['id'];
+          PTUserID = response['id']
           robot.brain.set('TrackerID'+slackUserID,PTUserID)
           robot.send {room: slackUserID}, "I have set your token to "+
             robot.brain.get('TrackerToken'+msg.message.user.id)+". Welcome to pt project "+
@@ -185,22 +185,39 @@ module.exports = (robot) ->
   robot.respond /show me my stories[!]?/i, (msg) ->
     slackUserID = msg.message.user.id
     token = robot.brain.get 'TrackerToken'+slackUserID
-    tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
-    url = pivotalTrackerUrl+"projects/"+tracker_projectID+"/stories"
+    # tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
+    # url = pivotalTrackerUrl+"projects/"+tracker_projectID+"/stories"
     my_stories = {}
     i = 1
-    robot.logger.debug(url)
-    robot.http(url+"?date_format=millis&filter=current_state:unstarted,started,finished,delivered")
+    requests = 0
+    robot.logger.debug "Vars: token:#{robot.brain.get('TrackerID'+slackUserID)}"
+    robot.http(pivotalTrackerUrl+"me")
       .header('Content-Type', 'application/json')
       .header('X-TrackerToken',token)
       .get() (err, res, body) ->
         if err
           robot.logger.error err
         else
-          stories = JSON.parse body
+          me = JSON.parse body
           robot.logger.debug body
-          for story in stories
-            if robot.brain.get('TrackerID'+slackUserID) in story['owner_ids']
-              my_stories[i] = story['name']+": ID: "+story['id']+", State: "+story['current_state']
-              i = i + 1
-          robot.send {room:slackUserID}, JSON.stringify(my_stories,null,1)
+          for project in me['projects']
+            requests++
+            url = pivotalTrackerUrl+"projects/"+project.project_id+"/stories"
+            robot.logger.debug(url)
+            robot.http(url+"?date_format=millis&filter=current_state:unstarted,started,finished,delivered")
+              .header('Content-Type', 'application/json')
+              .header('X-TrackerToken',token)
+              .get() (err, res, body) ->
+                if err
+                  robot.logger.error err
+                else
+                  requests--
+                  stories = JSON.parse body
+                  robot.logger.debug body
+                  for story in stories
+                    if robot.brain.get('TrackerID'+slackUserID) in story['owner_ids']
+                      my_stories[i] = story['name']+": ID: "+story['id']+", State: "+story['current_state']
+                      i = i + 1
+                  if requests == 0
+                    robot.logger.debug my_stories
+                    msg.sendPrivate JSON.stringify(my_stories, null, 1)
