@@ -219,7 +219,7 @@ module.exports = (robot) ->
                       my_stories[i] = story['name'] +
                                       " - ID: #{story['id']}" +
                                       ", State: #{story['current_state']}" +
-                                      ", Project: #{project.project_id}"
+                                      ", Project: #{story['project_id']}"
                       i = i + 1
                   if requests == 0
                     robot.logger.debug my_stories
