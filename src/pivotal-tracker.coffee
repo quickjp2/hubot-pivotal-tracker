@@ -216,7 +216,10 @@ module.exports = (robot) ->
                   robot.logger.debug body
                   for story in stories
                     if robot.brain.get('TrackerID'+slackUserID) in story['owner_ids']
-                      my_stories[i] = story['name']+": ID: "+story['id']+", State: "+story['current_state']
+                      my_stories[i] = story['name'] +
+                                      " - ID: #{story['id']}" +
+                                      ", State: #{story['current_state']}" +
+                                      ", Project: #{project.project_id}"
                       i = i + 1
                   if requests == 0
                     robot.logger.debug my_stories
