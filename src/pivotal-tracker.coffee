@@ -178,30 +178,31 @@ module.exports = (robot) ->
           robot.logger.debug body
           msg.reply "story " + response['id'] + " is now "+ response['current_state']
 
-  # Use provided project with no labels
-  robot.respond /create[mea\s]*story[in\s]+project (\d+) titled (.*\w*)/i, (msg) ->
+  # Use provided labels with default project
+  robot.respond /create[mea\s]*story[tha's\s]+labeled (.*\w*) titled (.*\w*)/i, (msg) ->
     name = msg.match[2]
-    project = msg.match[1]
+    labels = msg.match[1].split ", "
     slackUserID = msg.message.user.id
     token = robot.brain.get 'TrackerToken' + slackUserID
-    createStory robot, msg, token, name, project
+    project = robot.brain.get 'TrackerProjectID'+slackUserID
+    createStory robot, msg, token, name, project, labels
 
   # Use provided project, label(s) and title
-  robot.respond /create[mea\s]*story[tha's\s]+labeled (.*\w*)[in\s]+project (\d+) titled (.*\w*)/i, (msg) ->
+  robot.respond /create[mea\s]*story[in\s]+project (\d+)[tha's\s]+labeled (.*\w*) titled (.*\w*)/i, (msg) ->
     name = msg.match[3]
     labels = msg.match[1].split ","
     project = msg.match[2]
     slackUserID = msg.message.user.id
     token = robot.brain.get 'TrackerToken' + slackUserID
     createStory robot, msg, token, name, project, labels
-    
+
   # Use default project with no labels
   robot.respond /create[mea\s]+story titled (.*\w*)/i, (msg) ->
     name = msg.match[1]
     slackUserID = msg.message.user.id
     token = robot.brain.get 'TrackerToken'+slackUserID
-    tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
-    createStory robot, msg, token, name, tracker_projectID
+    project = robot.brain.get 'TrackerProjectID'+slackUserID
+    createStory robot, msg, token, name, project
 
   # Let's do something cool and output the stories
   robot.respond /show me my stories[!]?/i, (msg) ->

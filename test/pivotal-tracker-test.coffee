@@ -165,13 +165,13 @@ describe 'pivotal-tracker', ->
             ['alice', '@hubot create me a story titled need to make something simple']
             ['hubot', '@alice story created with id:123456789! Check it out at https://www.pivotaltracker.com/story/show/123456789!']
           ]
-    it 'responds to project create story', ->
+    it 'responds to partial create story', ->
       @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
-        @room.user.say('alice', '@hubot create story in project 7654321 titled need to make something simple').then =>
+        @room.user.say('alice', '@hubot create story labeled this is a test titled need to make something simple').then =>
           expect(@room.messages).to.eql [
             ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
             ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
-            ['alice', '@hubot create story in project 7654321 titled need to make something simple']
+            ['alice', '@hubot create story labeled this is a test titled need to make something simple']
             ['hubot', '@alice story created with id:123456789! Check it out at https://www.pivotaltracker.com/story/show/123456789!']
           ]
     it 'responds to full create story', ->
