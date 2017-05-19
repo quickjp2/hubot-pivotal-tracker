@@ -9,7 +9,9 @@
 #   hubot what is my pt project id? - Retrieves the pt project id you are set to use (DM)
 #   hubot what is my pt token? - Retrieves the api token hubot has on file for you (DM)
 #   hubot set my pt api token to:<API Token> - Associates the slack user with a API token
-#   hubot create me a story titled <title> - creates a new story in the icebox
+#   hubot create me a story titled <title> - creates a new story
+#   hubot create me a story that's labeled <label1(, label 2...)> titled <title> - creates a new story with labels
+#   hubot create story project <project_id> labeled <label1(, label 2...)> titled <title> - full create story
 #   hubot what stories are undelivered this week - lists all stories (FUTURE)
 #   hubot start story <story_id> - starts the story
 #   hubot deliver story <story_id> - finishes the story
@@ -27,6 +29,27 @@ https = require 'https'
 
 # Global Variables
 pivotalTrackerUrl = process.env.TRACKER_URL
+
+createStory = (robot, msg, token, title, project, labels = null) ->
+  data = JSON.stringify {
+    current_state: 'unstarted',
+    estimate: 1,
+    name: title
+    }
+  data['labels'] = labels if labels?
+  url = "#{pivotalTrackerUrl}projects/#{project}/stories"
+  robot.logger.debug(url)
+  robot.http(url)
+    .header('Content-Type', 'application/json')
+    .header('X-TrackerToken',token)
+    .post(data) (err, res, body) ->
+      if err
+        robot.logger.error err
+      else
+        response = JSON.parse body
+        robot.logger.debug body
+        msg.reply "story created with id:"+response['id']+
+          "! Check it out at "+response['url']+"!"
 
 module.exports = (robot) ->
   robot.respond /hello/i, (msg) ->
@@ -157,29 +180,31 @@ module.exports = (robot) ->
           robot.logger.debug body
           msg.reply "story " + response['id'] + " is now "+ response['current_state']
 
-  robot.respond /create me[\sa]{1,3}story titled (.*\w*)/i, (msg) ->
+  # Use provided labels with default project
+  robot.respond /create[mea\s]*story[tha's\s]+labeled (.*\w*) titled (.*\w*)/i, (msg) ->
+    name = msg.match[2]
+    labels = msg.match[1].split ", "
+    slackUserID = msg.message.user.id
+    token = robot.brain.get 'TrackerToken' + slackUserID
+    project = robot.brain.get 'TrackerProjectID'+slackUserID
+    createStory robot, msg, token, name, project, labels
+
+  # Use provided project, label(s) and title
+  robot.respond /create[mea\s]*story[in\s]+project (\d+)[tha's\s]+labeled (.*\w*) titled (.*\w*)/i, (msg) ->
+    name = msg.match[3]
+    labels = msg.match[1].split ","
+    project = msg.match[2]
+    slackUserID = msg.message.user.id
+    token = robot.brain.get 'TrackerToken' + slackUserID
+    createStory robot, msg, token, name, project, labels
+
+  # Use default project with no labels
+  robot.respond /create[mea\s]+story titled (.*\w*)/i, (msg) ->
     name = msg.match[1]
     slackUserID = msg.message.user.id
     token = robot.brain.get 'TrackerToken'+slackUserID
-    tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
-    data = JSON.stringify {
-      current_state: 'unstarted',
-      estimate: 1,
-      name: name
-      }
-    url = pivotalTrackerUrl+"projects/"+tracker_projectID+"/stories"
-    robot.logger.debug(url)
-    robot.http(url)
-      .header('Content-Type', 'application/json')
-      .header('X-TrackerToken',token)
-      .post(data) (err, res, body) ->
-        if err
-          robot.logger.error err
-        else
-          response = JSON.parse body
-          robot.logger.debug body
-          msg.reply "story created with id:"+response['id']+
-            "! Check it out at "+response['url']+"!"
+    project = robot.brain.get 'TrackerProjectID'+slackUserID
+    createStory robot, msg, token, name, project
 
   # Let's do something cool and output the stories
   robot.respond /show me my stories[!]?/i, (msg) ->

@@ -72,6 +72,21 @@ describe 'pivotal-tracker', ->
         created_at:"2016-12-09T22:35:24Z",
         updated_at:"2016-12-09T22:35:24Z",
         url:"https://www.pivotaltracker.com/story/show/123456789"})
+      .post('/projects/'+PROJECT_ID+'/stories',{current_state:'unstarted',estimate:1,name:'need to make something simple',labels:['this is a test']})
+      .reply(200,
+        {kind:"story",
+        id:123456789,
+        project_id: PROJECT_ID,
+        name:"need to make something simple",
+        story_type:"feature",
+        current_state:"unstarted",
+        estimate:1,
+        requested_by_id:1234567,
+        owner_ids:[],
+        labels:["this is a test"],
+        created_at:"2016-12-09T22:35:24Z",
+        updated_at:"2016-12-09T22:35:24Z",
+        url:"https://www.pivotaltracker.com/story/show/123456789"})
       .put('/projects/'+PROJECT_ID+'/stories/123456789',{current_state:"started"})
       .reply(200,
         {kind:"story",
@@ -82,7 +97,7 @@ describe 'pivotal-tracker', ->
         {kind:"story",
         id:123456789,
         current_state:"delivered"})
-      .get('/projects/'+PROJECT_ID+'/stories?date_format=millis&filter=current_state%3Aunstarted%2Cstarted%2Cfinished%2Cdelivered')
+      .get('/projects/'+PROJECT_ID+'/stories?date_format=millis&filter=current_state%3Aunstarted%2Cstarted%2Cfinished%2Cdelivered%20and%20owner%3A101')
       .times(2)
       .reply(200,
         [{kind:"story",
@@ -141,13 +156,31 @@ describe 'pivotal-tracker', ->
           ['hubot', 'well this is awkward...you don\'t have a token set yet...']
         ]
   context "interacts with stories", ->
-    it 'responds to create a story after adding a user', ->
+    it 'responds to default create story', ->
       @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
         @room.user.say('alice', '@hubot create me a story titled need to make something simple').then =>
           expect(@room.messages).to.eql [
             ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
             ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
             ['alice', '@hubot create me a story titled need to make something simple']
+            ['hubot', '@alice story created with id:123456789! Check it out at https://www.pivotaltracker.com/story/show/123456789!']
+          ]
+    it 'responds to partial create story', ->
+      @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
+        @room.user.say('alice', '@hubot create story labeled this is a test titled need to make something simple').then =>
+          expect(@room.messages).to.eql [
+            ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
+            ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
+            ['alice', '@hubot create story labeled this is a test titled need to make something simple']
+            ['hubot', '@alice story created with id:123456789! Check it out at https://www.pivotaltracker.com/story/show/123456789!']
+          ]
+    it 'responds to full create story', ->
+      @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
+        @room.user.say('alice', '@hubot create story labeled this is a test project 7654321 titled need to make something simple').then =>
+          expect(@room.messages).to.eql [
+            ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
+            ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
+            ['alice', '@hubot create story labeled this is a test project 7654321 titled need to make something simple']
             ['hubot', '@alice story created with id:123456789! Check it out at https://www.pivotaltracker.com/story/show/123456789!']
           ]
     it 'starts a story', ->
