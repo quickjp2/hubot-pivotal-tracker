@@ -28,13 +28,13 @@ https = require 'https'
 # Global Variables
 pivotalTrackerUrl = process.env.TRACKER_URL
 
-createStory = (robot, msg, token, title, project, tags = null) ->
+createStory = (robot, msg, token, title, project, labels = null) ->
   data = JSON.stringify {
     current_state: 'unstarted',
     estimate: 1,
     name: title
     }
-  data['tags'] = tags if tags?
+  data['labels'] = labels if labels?
   url = "#{pivotalTrackerUrl}projects/#{project}/stories"
   robot.logger.debug(url)
   robot.http(url)
@@ -178,12 +178,31 @@ module.exports = (robot) ->
           robot.logger.debug body
           msg.reply "story " + response['id'] + " is now "+ response['current_state']
 
+  # Use provided project with no labels
+  robot.respond /create[mea\s]*story[in\s]+project (\d+) titled (.*\w*)/i, (msg) ->
+    name = msg.match[2]
+    project = msg.match[1]
+    slackUserID = msg.message.user.id
+    token = robot.brain.get 'TrackerToken' + slackUserID
+    createStory robot, msg, token, name, project
+
+  # Use provided project, label(s) and title
+  robot.respond /create[mea\s]*story[tha's\s]+labeled (.*\w*)[in\s]+project (\d+) titled (.*\w*)/i, (msg) ->
+    name = msg.match[3]
+    labels = msg.match[1].split ","
+    project = msg.match[2]
+    slackUserID = msg.message.user.id
+    token = robot.brain.get 'TrackerToken' + slackUserID
+    createStory robot, msg, token, name, project, labels
+    
+  # Use default project with no labels
   robot.respond /create[mea\s]+story titled (.*\w*)/i, (msg) ->
     name = msg.match[1]
     slackUserID = msg.message.user.id
     token = robot.brain.get 'TrackerToken'+slackUserID
     tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
     createStory robot, msg, token, name, tracker_projectID
+
   # Let's do something cool and output the stories
   robot.respond /show me my stories[!]?/i, (msg) ->
     slackUserID = msg.message.user.id
