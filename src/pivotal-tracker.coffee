@@ -9,7 +9,9 @@
 #   hubot what is my pt project id? - Retrieves the pt project id you are set to use (DM)
 #   hubot what is my pt token? - Retrieves the api token hubot has on file for you (DM)
 #   hubot set my pt api token to:<API Token> - Associates the slack user with a API token
-#   hubot create me a story titled <title> - creates a new story in the icebox
+#   hubot create me a story titled <title> - creates a new story
+#   hubot create me a story that's labeled <label1(, label 2...)> titled <title> - creates a new story with labels
+#   hubot create story project <project_id> labeled <label1(, label 2...)> titled <title> - full create story
 #   hubot what stories are undelivered this week - lists all stories (FUTURE)
 #   hubot start story <story_id> - starts the story
 #   hubot deliver story <story_id> - finishes the story
