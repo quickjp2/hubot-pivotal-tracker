@@ -28,6 +28,27 @@ https = require 'https'
 # Global Variables
 pivotalTrackerUrl = process.env.TRACKER_URL
 
+createStory = (robot, msg, token, title, project, tags = null) ->
+  data = JSON.stringify {
+    current_state: 'unstarted',
+    estimate: 1,
+    name: title
+    }
+  data['tags'] = tags if tags?
+  url = "#{pivotalTrackerUrl}projects/#{project}/stories"
+  robot.logger.debug(url)
+  robot.http(url)
+    .header('Content-Type', 'application/json')
+    .header('X-TrackerToken',token)
+    .post(data) (err, res, body) ->
+      if err
+        robot.logger.error err
+      else
+        response = JSON.parse body
+        robot.logger.debug body
+        msg.reply "story created with id:"+response['id']+
+          "! Check it out at "+response['url']+"!"
+
 module.exports = (robot) ->
   robot.respond /hello/i, (msg) ->
     msg.reply "hello!"
@@ -157,30 +178,12 @@ module.exports = (robot) ->
           robot.logger.debug body
           msg.reply "story " + response['id'] + " is now "+ response['current_state']
 
-  robot.respond /create me[\sa]{1,3}story titled (.*\w*)/i, (msg) ->
+  robot.respond /create[mea\s]+story titled (.*\w*)/i, (msg) ->
     name = msg.match[1]
     slackUserID = msg.message.user.id
     token = robot.brain.get 'TrackerToken'+slackUserID
     tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
-    data = JSON.stringify {
-      current_state: 'unstarted',
-      estimate: 1,
-      name: name
-      }
-    url = pivotalTrackerUrl+"projects/"+tracker_projectID+"/stories"
-    robot.logger.debug(url)
-    robot.http(url)
-      .header('Content-Type', 'application/json')
-      .header('X-TrackerToken',token)
-      .post(data) (err, res, body) ->
-        if err
-          robot.logger.error err
-        else
-          response = JSON.parse body
-          robot.logger.debug body
-          msg.reply "story created with id:"+response['id']+
-            "! Check it out at "+response['url']+"!"
-
+    createStory robot, msg, token, name, tracker_projectID
   # Let's do something cool and output the stories
   robot.respond /show me my stories[!]?/i, (msg) ->
     slackUserID = msg.message.user.id
