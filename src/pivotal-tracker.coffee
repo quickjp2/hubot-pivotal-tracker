@@ -248,3 +248,65 @@ module.exports = (robot) ->
                   if requests == 0
                     robot.logger.debug my_stories
                     msg.send { room: slackUserID }, JSON.stringify(my_stories, null, 1)
+
+  robot.respond /show me my projects/i, (msg) ->
+    slackUserID = msg.message.user.id
+    token = robot.brain.get 'TrackerToken'+slackUserID
+    my_projects = {}
+    robot.http(pivotalTrackerUrl+"me")
+      .header('Content-Type', 'application/json')
+      .header('X-TrackerToken',token)
+      .get() (err, res, body) ->
+        if err
+          robot.logger.error err
+        else
+          me = JSON.parse body
+          robot.logger.debug body
+          for project in me['projects']
+            my_projects[project['name']] = project['project_id']
+          robot.logger.debug my_projects
+          msg.send { room: slackUserID }, JSON.stringify(my_projects, null, 1)
+
+  robot.respond /what epics are in project (.*)/i, (msg) ->
+    slackUserID = msg.message.user.id
+    token = robot.brain.get 'TrackerToken'+slackUserID
+    project = msg.match[1]
+    my_epics = {}
+    url = pivotalTrackerUrl+"projects/"+project+"/epics"
+    robot.logger.debug(url)
+    robot.http(url)
+      .header('Content-Type', 'application/json')
+      .header('X-TrackerToken',token)
+      .get() (err, res, body) ->
+        if err
+          robot.logger.error err
+        else
+          epics = JSON.parse body
+          robot.logger.debug body
+          for epic in epics
+            my_epics[epic['name']] = {}
+            my_epics[epic['name']]['id'] = epic['id']
+            my_epics[epic['name']]['project_id'] = epic['project_id']
+            my_epics[epic['name']]['label'] = epic['label']['name']
+          robot.logger.debug my_epics
+          msg.send { room: slackUserID }, JSON.stringify(my_epics, null, 1)
+  robot.respond /what labels are in project (.*)/i, (msg) ->
+    slackUserID = msg.message.user.id
+    token = robot.brain.get 'TrackerToken'+slackUserID
+    project = msg.match[1]
+    my_labels = []
+    url = pivotalTrackerUrl+"projects/"+project.project_id+"/epics"
+    robot.logger.debug(url)
+    robot.http(url)
+      .header('Content-Type', 'application/json')
+      .header('X-TrackerToken',token)
+      .get() (err, res, body) ->
+        if err
+          robot.logger.error err
+        else
+          labels = JSON.parse body
+          robot.logger.debug body
+          for label in labels
+            my_labels.push label.name
+          robot.logger.debug my_labels
+          msg.send { room: slackUserID }, JSON.stringify(my_labels, null, 1)
