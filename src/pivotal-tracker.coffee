@@ -146,7 +146,7 @@ module.exports = (robot) ->
     owners = []
     owners.push(robot.brain.get('TrackerID'+slackUserID))
     data = JSON.stringify { current_state: 'started', owner_ids: owners}
-    url = pivotalTrackerUrl+"projects/"+tracker_projectID+"/stories/"+storyID
+    url = "#{pivotalTrackerUrl}stories/#{storyID}"
 
     robot.logger.debug url
     robot.http(url)
@@ -166,7 +166,7 @@ module.exports = (robot) ->
     tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
     token = robot.brain.get 'TrackerToken'+slackUserID
     data = JSON.stringify { current_state: 'delivered'}
-    url = pivotalTrackerUrl+"projects/"+tracker_projectID+"/stories/"+storyID
+    url = "#{pivotalTrackerUrl}stories/#{storyID}"
 
     robot.logger.debug url
     robot.http(url)
