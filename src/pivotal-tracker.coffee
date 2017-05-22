@@ -147,7 +147,6 @@ module.exports = (robot) ->
     owners.push(robot.brain.get('TrackerID'+slackUserID))
     data = JSON.stringify { current_state: 'started', owner_ids: owners}
     url = "#{pivotalTrackerUrl}stories/#{storyID}"
-
     robot.logger.debug url
     robot.http(url)
       .header('Content-Type', 'application/json')
@@ -207,7 +206,7 @@ module.exports = (robot) ->
     createStory robot, msg, token, name, project
 
   # Let's do something cool and output the stories
-  robot.respond /show me my stories[!]?/i, (msg) ->
+  robot.respond /show[mea\s]*my stories[!]?/i, (msg) ->
     slackUserID = msg.message.user.id
     token = robot.brain.get 'TrackerToken'+slackUserID
     # tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
@@ -227,7 +226,7 @@ module.exports = (robot) ->
           robot.logger.debug body
           for project in me['projects']
             requests++
-            url = pivotalTrackerUrl+"projects/"+project.project_id+"/stories"
+            url = "#{pivotalTrackerUrl}projects/#{project['project_id']}/stories"
             robot.logger.debug(url)
             robot.http(url+"?date_format=millis&filter=current_state:unstarted,started,finished,delivered%20and%20owner:#{robot.brain.get('TrackerID'+slackUserID)}")
               .header('Content-Type', 'application/json')
@@ -249,7 +248,7 @@ module.exports = (robot) ->
                     robot.logger.debug my_stories
                     msg.send { room: slackUserID }, JSON.stringify(my_stories, null, 1)
 
-  robot.respond /show me my projects/i, (msg) ->
+  robot.respond /show[mea\s]*my projects/i, (msg) ->
     slackUserID = msg.message.user.id
     token = robot.brain.get 'TrackerToken'+slackUserID
     my_projects = {}
@@ -263,11 +262,11 @@ module.exports = (robot) ->
           me = JSON.parse body
           robot.logger.debug body
           for project in me['projects']
-            my_projects[project['name']] = project['project_id']
+            my_projects[project['project_name']] = project['project_id']
           robot.logger.debug my_projects
           msg.send { room: slackUserID }, JSON.stringify(my_projects, null, 1)
 
-  robot.respond /what epics are in project (.*)/i, (msg) ->
+  robot.respond /show epics in project (.*)\??/i, (msg) ->
     slackUserID = msg.message.user.id
     token = robot.brain.get 'TrackerToken'+slackUserID
     project = msg.match[1]
@@ -286,16 +285,16 @@ module.exports = (robot) ->
           for epic in epics
             my_epics[epic['name']] = {}
             my_epics[epic['name']]['id'] = epic['id']
-            my_epics[epic['name']]['project_id'] = epic['project_id']
             my_epics[epic['name']]['label'] = epic['label']['name']
+            my_epics[epic['name']]['url'] = epic['url']
           robot.logger.debug my_epics
-          msg.send { room: slackUserID }, JSON.stringify(my_epics, null, 1)
-  robot.respond /what labels are in project (.*)/i, (msg) ->
+          msg.send JSON.stringify(my_epics, null, 1)
+  robot.respond /show labels in project (.*)\??/i, (msg) ->
     slackUserID = msg.message.user.id
     token = robot.brain.get 'TrackerToken'+slackUserID
     project = msg.match[1]
     my_labels = []
-    url = pivotalTrackerUrl+"projects/"+project.project_id+"/epics"
+    url = pivotalTrackerUrl+"projects/"+project+"/labels"
     robot.logger.debug(url)
     robot.http(url)
       .header('Content-Type', 'application/json')
@@ -309,4 +308,4 @@ module.exports = (robot) ->
           for label in labels
             my_labels.push label.name
           robot.logger.debug my_labels
-          msg.send { room: slackUserID }, JSON.stringify(my_labels, null, 1)
+          msg.send JSON.stringify(my_labels, null, 1)

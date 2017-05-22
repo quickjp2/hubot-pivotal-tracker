@@ -18,7 +18,7 @@ describe 'pivotal-tracker', ->
     nock('https://www.pivotaltracker.com/services/v5')
       .matchHeader('X-TrackerToken','abcdefg123hijklmnop456789')
       .get('/me')
-      .times(2)
+      .times(5)
       .reply(200,
         {api_token: "VadersToken",
         created_at: "2016-12-06T12:00:05Z",
@@ -40,8 +40,8 @@ describe 'pivotal-tracker', ->
         },
         {
           kind: "membership_summary",
-          id:101,
-          project_id:PROJECT_ID,
+          id:109,
+          project_id:PROJECT_ID+1,
           project_name: "Death Star",
           project_color: "8100ea",
           favorite:false,
@@ -87,29 +87,101 @@ describe 'pivotal-tracker', ->
         created_at:"2016-12-09T22:35:24Z",
         updated_at:"2016-12-09T22:35:24Z",
         url:"https://www.pivotaltracker.com/story/show/123456789"})
-      .put('/projects/'+PROJECT_ID+'/stories/123456789',{current_state:"started"})
+      .put('/stories/123456789',{current_state:"started"})
       .reply(200,
         {kind:"story",
         id:123456789,
         current_state:"started"})
-      .put('/projects/'+PROJECT_ID+'/stories/123456789',{current_state:"delivered"})
+      .put('/stories/123456789',{current_state:"delivered"})
       .reply(200,
         {kind:"story",
         id:123456789,
         current_state:"delivered"})
       .get('/projects/'+PROJECT_ID+'/stories?date_format=millis&filter=current_state%3Aunstarted%2Cstarted%2Cfinished%2Cdelivered%20and%20owner%3A101')
-      .times(2)
+      .times(3)
       .reply(200,
         [{kind:"story",
         id:123456789,
+        project_id: PROJECT_ID,
         name:"need to make something simple",
         current_state:"started",
         owner_ids:[101]},
         {kind:"story",
         id:123456781,
+        project_id: PROJECT_ID,
         name:"need to make something simple 2",
         current_state:"unstarted",
         owner_ids:[102]}])
+      .get('/projects/7654322/stories?date_format=millis&filter=current_state%3Aunstarted%2Cstarted%2Cfinished%2Cdelivered%20and%20owner%3A101')
+      .times(3)
+      .reply(200,
+        [{kind:"story",
+        id:123456782,
+        project_id: PROJECT_ID+1,
+        name:"need to make something simple 3",
+        current_state:"started",
+        owner_ids:[101]},
+        {kind:"story",
+        id:123456783,
+        project_id: PROJECT_ID+1,
+        name:"need to make something simple 4",
+        current_state:"unstarted",
+        owner_ids:[102]}])
+      .get('/projects/'+PROJECT_ID+'/epics')
+      .times(1)
+      .reply(200,
+        [{
+          id: 555,
+          kind: "epic",
+          created_at: "2017-05-09T12:00:00Z",
+          updated_at: "2017-05-09T12:00:00Z",
+          project_id: PROJECT_ID,
+          name: "Sanitation",
+          url: "http://localhost/epic/show/555",
+          label: {
+            id: 2017,
+            project_id:PROJECT_ID,
+            kind: "label",
+            name: "sanitation",
+            created_at: "2017-05-09T12:00:00Z",
+            updated_at: "2017-05-09T12:00:00Z"
+          }
+        },
+        {
+          id: 8,
+          kind: "epic",
+          created_at: "2017-05-09T12:00:00Z",
+          updated_at: "2017-05-09T12:00:00Z",
+          project_id: PROJECT_ID,
+          name: "Maintenance",
+          url: "http://localhost/epic/show/8",
+          label: {
+            id: 2011,
+            project_id: PROJECT_ID,
+            kind: "label",
+            name: "mnt",
+            created_at: "2017-05-09T12:00:00Z",
+            updated_at: "2017-05-09T12:00:00Z"
+          }
+        }])
+      .get('/projects/' + PROJECT_ID + '/labels')
+      .times(1)
+      .reply(200,
+        [{
+          kind: "label",
+          id: 2011,
+          project_id: PROJECT_ID,
+          name: "mnt",
+          created_at: 1494331200000,
+          updated_at: 1494331200000
+        },{
+          kind: "label",
+          id: 2017,
+          project_id: PROJECT_ID,
+          name: "sanitation",
+          created_at: 1494331200000,
+          updated_at: 1494331200000
+        }])
     @room = helper.createRoom()
     @robot =
       respond: sinon.spy()
@@ -155,7 +227,7 @@ describe 'pivotal-tracker', ->
           ['alice', '@hubot fetch my pt id']
           ['hubot', 'well this is awkward...you don\'t have a token set yet...']
         ]
-  context "interacts with stories", ->
+  context "interacts with stories and", ->
     it 'responds to default create story', ->
       @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
         @room.user.say('alice', '@hubot create me a story titled need to make something simple').then =>
@@ -208,15 +280,39 @@ describe 'pivotal-tracker', ->
             ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
             ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
             ['alice', '@hubot show me my stories!']
-            # ['hubot', '{\n \"1\": \"need to make something simple: ID: 123456789, State: started\",\n \"2\": \"need to make something simple: ID: 123456789, State: started\"\n}']
+            ['hubot', {"room": "alice"}]
+            ['hubot', '{\n \"1\": \"need to make something simple - ID: 123456789, State: started, Project: 7654321\",\n \"2\": \"need to make something simple 2 - ID: 123456781, State: unstarted, Project: 7654321\",\n \"3\": \"need to make something simple 3 - ID: 123456782, State: started, Project: 7654322\",\n \"4\": \"need to make something simple 4 - ID: 123456783, State: unstarted, Project: 7654322\"\n}']
           ]
-          # expect(@room.privateMessages).to.include {
-          #   'alice': [
-          #     ['hubot', '{\n \"1\": \"need to make something simple: ID: 123456789, State: started\",\n \"2\": \"need to make something simple: ID: 123456789, State: started\"\n}']
-          #   ]
-          # }
 
-  # context "example tests", ->
+  context "Extras!", ->
+    it 'shows a list of projects you are apart of', ->
+      @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
+        @room.user.say('alice', '@hubot show me my projects').then =>
+          expect(@room.messages).to.eql [
+            ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
+            ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
+            ['alice', '@hubot show me my projects']
+            ['hubot', {"room": "alice"}]
+            ['hubot', '{\n \"Learn About the Force\": 7654321,\n \"Death Star\": 7654322\n}']
+          ]
+    it 'shows a list of epics in a project', ->
+      @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
+        @room.user.say('alice', '@hubot show epics in project 7654321').then =>
+          expect(@room.messages).to.eql [
+            ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
+            ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
+            ['alice', '@hubot show epics in project 7654321']
+            ['hubot', '{\n \"Sanitation\": {\n  "id": 555,\n  "label": "sanitation",\n  "url": "http://localhost/epic/show/555"\n },\n \"Maintenance\": {\n  "id": 8,\n  "label": "mnt",\n  "url": "http://localhost/epic/show/8"\n }\n\}']
+          ]
+    it 'shows the labels of project', ->
+      @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
+        @room.user.say('alice', '@hubot show labels in project 7654321').then =>
+          expect(@room.messages).to.eql [
+            ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
+            ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
+            ['alice', '@hubot show labels in project 7654321']
+            ['hubot', '[\n \"mnt\",\n \"sanitation\"\n]']
+          ]
   #   it 'responds to hello', ->
   #     @room.user.say('alice', '@hubot hello').then =>
   #       expect(@room.messages).to.eql [
