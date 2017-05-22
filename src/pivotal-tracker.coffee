@@ -17,6 +17,9 @@
 #   hubot deliver story <story_id> - finishes the story
 #   hubot fetch my pt id - send you your pt id (DM)
 #   hubot show me my stories! - lists the stories assigned to you (DM)
+#   hubot show me my projects - lists the projects you are apart of
+#   hubot show epics in project <project_id> - Lists the epics in a project
+#   hubot show labels in project <project_id> - Lists the labels in a project
 #   hubot add me to pt project id:<PT_team_id> using token:<API_Token> - Associates the user with both a team and token
 #
 # Notes:
