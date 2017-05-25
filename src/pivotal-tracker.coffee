@@ -34,18 +34,20 @@ https = require 'https'
 pivotalTrackerUrl = process.env.TRACKER_URL
 
 createStory = (robot, msg, token, title, project, labels = null) ->
-  data = JSON.stringify {
+  data = {
     current_state: 'unstarted',
     estimate: 1,
     name: title
     }
-  data['labels'] = labels if labels?
+  if labels?
+    data['labels'] = labels
+  robot.logger.debug(data)
   url = "#{pivotalTrackerUrl}projects/#{project}/stories"
   robot.logger.debug(url)
   robot.http(url)
     .header('Content-Type', 'application/json')
     .header('X-TrackerToken',token)
-    .post(data) (err, res, body) ->
+    .post(JSON.stringify(data)) (err, res, body) ->
       if err
         robot.logger.error err
       else
