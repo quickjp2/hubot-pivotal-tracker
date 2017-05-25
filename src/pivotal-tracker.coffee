@@ -194,8 +194,8 @@ module.exports = (robot) ->
   # Use provided project, label(s) and title
   robot.respond /create[mea\s]*story[in\s]+project (\d+)[tha's\s]+labeled (.*\w*) titled (.*\w*)/i, (msg) ->
     name = msg.match[3]
-    labels = msg.match[1].split ","
-    project = msg.match[2]
+    labels = msg.match[2].split ","
+    project = msg.match[1]
     slackUserID = msg.message.user.id
     token = robot.brain.get 'TrackerToken' + slackUserID
     createStory robot, msg, token, name, project, labels
