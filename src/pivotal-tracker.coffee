@@ -163,6 +163,25 @@ module.exports = (robot) ->
           response = JSON.parse body
           robot.logger.debug body
           msg.reply "story " + response['id'] + " is now "+ response['current_state']
+  robot.respond /finish story (\d+)/i, (msg) ->
+    storyID = msg.match[1]
+    slackUserID = msg.message.user.id
+    tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
+    token = robot.brain.get 'TrackerToken'+slackUserID
+    data = JSON.stringify { current_state: 'finished'}
+    url = "#{pivotalTrackerUrl}stories/#{storyID}"
+
+    robot.logger.debug url
+    robot.http(url)
+      .header('Content-Type', 'application/json')
+      .header('X-TrackerToken',token)
+      .put(data) (err, res, body) ->
+        if err
+          robot.logger.debug err
+        else
+          response = JSON.parse body
+          robot.logger.debug body
+          msg.reply "story " + response['id'] + " is now "+ response['current_state']
 
   robot.respond /deliver story (\d+)/i, (msg) ->
     storyID = msg.match[1]
