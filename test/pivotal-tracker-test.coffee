@@ -10,6 +10,7 @@ helper = new Helper('../src/pivotal-tracker.coffee')
 PROJECT_ID = 7654321
 
 process.env.TRACKER_PROJECT_ID = PROJECT_ID
+process.env.TRACKER_URL = 'https://www.pivotaltracker.com/services/v5/'
 
 describe 'pivotal-tracker', ->
   room = null
@@ -271,7 +272,7 @@ describe 'pivotal-tracker', ->
           ]
     it 'finishes a story', ->
       @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
-        @room.user.say('alice', '@hubot deliver story 123456789').then =>
+        @room.user.say('alice', '@hubot finish story 123456789').then =>
           expect(@room.messages).to.eql [
             ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
             ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
