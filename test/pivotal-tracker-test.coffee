@@ -10,6 +10,7 @@ helper = new Helper('../src/pivotal-tracker.coffee')
 PROJECT_ID = 7654321
 
 process.env.TRACKER_PROJECT_ID = PROJECT_ID
+process.env.TRACKER_URL = 'https://www.pivotaltracker.com/services/v5/'
 
 describe 'pivotal-tracker', ->
   room = null
@@ -97,6 +98,11 @@ describe 'pivotal-tracker', ->
         {kind:"story",
         id:123456789,
         current_state:"delivered"})
+      .put('/stories/123456789',{current_state:"finished"})
+      .reply(200,
+        {kind:"story",
+        id:123456789,
+        current_state:"finished"})
       .get('/projects/'+PROJECT_ID+'/stories?date_format=millis&filter=current_state%3Aunstarted%2Cstarted%2Cfinished%2Cdelivered%20and%20owner%3A101')
       .times(3)
       .reply(200,
@@ -263,6 +269,15 @@ describe 'pivotal-tracker', ->
             ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
             ['alice', '@hubot start story 123456789']
             ['hubot', '@alice story 123456789 is now started']
+          ]
+    it 'finishes a story', ->
+      @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
+        @room.user.say('alice', '@hubot finish story 123456789').then =>
+          expect(@room.messages).to.eql [
+            ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
+            ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
+            ['alice', '@hubot finish story 123456789']
+            ['hubot', '@alice story 123456789 is now finished']
           ]
     it 'delivers a story', ->
       @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
