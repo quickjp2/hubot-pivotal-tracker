@@ -1,16 +1,16 @@
 {
   "name": "hubot-pivotal-tracker",
   "description": "A module to enable interactions with pivotal tracker",
-  "version": "2.6.0",
-  "author": "JP Quicksall <john.quicksall1@t-mobile.com>",
+  "version": "2.7.2",
+  "author": "JP Quicksall <john.paul.quicksall@gmail.com>",
   "license": "MIT",
   "keywords": "hubot, hubot-scripts, pivotal, pivotal-tracker",
   "repository": {
     "type": "git",
-    "url": "git://github.com/hubot-scripts/hubot-pivotal-tracker.git"
+    "url": "git://github.com/quickjp2/hubot-pivotal-tracker.git"
   },
   "bugs": {
-    "url": "https://github.com/hubot-scripts/hubot-pivotal-tracker/issues"
+    "url": "https://github.com/quickjp2/hubot-pivotal-tracker/issues"
   },
   "dependencies": {},
   "peerDependencies": {

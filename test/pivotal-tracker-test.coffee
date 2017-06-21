@@ -103,6 +103,16 @@ describe 'pivotal-tracker', ->
         {kind:"story",
         id:123456789,
         current_state:"finished"})
+      .put('/stories/123456789',{current_state:"accepted"})
+      .reply(200,
+        {kind:"story",
+        id:123456789,
+        current_state:"accepted"})
+      .put('/stories/123456789',{current_state:"rejected"})
+      .reply(200,
+        {kind:"story",
+        id:123456789,
+        current_state:"rejected"})
       .get('/projects/'+PROJECT_ID+'/stories?date_format=millis&filter=current_state%3Aunstarted%2Cstarted%2Cfinished%2Cdelivered%20and%20owner%3A101')
       .times(3)
       .reply(200,
@@ -287,6 +297,24 @@ describe 'pivotal-tracker', ->
             ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
             ['alice', '@hubot deliver story 123456789']
             ['hubot', '@alice story 123456789 is now delivered']
+          ]
+    it 'accepts a story', ->
+      @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
+        @room.user.say('alice', '@hubot accept story 123456789').then =>
+          expect(@room.messages).to.eql [
+            ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
+            ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
+            ['alice', '@hubot accept story 123456789']
+            ['hubot', '@alice story 123456789 is now accepted :thumbs_up:']
+          ]
+    it 'rejects a story', ->
+      @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
+        @room.user.say('alice', '@hubot reject story 123456789').then =>
+          expect(@room.messages).to.eql [
+            ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
+            ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
+            ['alice', '@hubot reject story 123456789']
+            ['hubot', '@alice story 123456789 is now rejected :thumbs_down:']
           ]
     it 'shows you your stories', ->
       @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
