@@ -74,6 +74,7 @@ describe 'pivotal-tracker', ->
         updated_at:"2016-12-09T22:35:24Z",
         url:"https://www.pivotaltracker.com/story/show/123456789"})
       .post('/projects/'+PROJECT_ID+'/stories',{current_state:'unstarted',estimate:1,name:'need to make something simple',labels:['this is a test']})
+      .times(2)
       .reply(200,
         {kind:"story",
         id:123456789,
@@ -97,6 +98,17 @@ describe 'pivotal-tracker', ->
       .reply(200,
         {kind:"story",
         id:123456789,
+        current_state:"delivered"})
+      .put('/stories/123456789',{ owner_ids:[101]})
+      .reply(200,
+        {kind:"story",
+        id:123456789,
+        current_state:"delivered"})
+      .get('/stories/123456789')
+      .reply(200,
+        {kind:"story",
+        id:123456789,
+        owner_ids: [],
         current_state:"delivered"})
       .put('/stories/123456789',{current_state:"finished"})
       .reply(200,
@@ -280,6 +292,27 @@ describe 'pivotal-tracker', ->
             ['alice', '@hubot start story 123456789']
             ['hubot', '@alice story 123456789 is now started']
           ]
+    it 'adds an owner to a story', ->
+      @room.user.say('alice', '@hubot add me to pt project id:7654321 using token:abcdefg123hijklmnop456789').then =>
+        @room.user.say('alice', '@hubot create me a story titled need to make something simple').then =>
+          @room.user.say('alice', '@hubot add me as owner to story 123456789').then =>
+            expect(@room.messages).to.eql [
+              ['alice', '@hubot add me to pt project id:7654321 using token:abcdefg123hijklmnop456789']
+              ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
+              ['alice', '@hubot create me a story titled need to make something simple']
+              ['hubot', '@alice story created with id:123456789! Check it out at https://www.pivotaltracker.com/story/show/123456789!']
+              ['alice', '@hubot add me as owner to story 123456789']
+              ['hubot', '@alice you are now an owner for story 123456789']
+            ]
+    # it 'adds a seperate owner to a story', ->
+    #   @room.user.say('alice', '@hubot add me to pt project id:7654321 using token:abcdefg123hijklmnop456789').then =>
+    #     @room.user.say('alice', '@hubot add bob as owner story 123456789').then =>
+    #       expect(@room.messages).to.eql [
+    #         ['alice', '@hubot add me to pt project id:7654321 using token:abcdefg123hijklmnop456789']
+    #         ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
+    #         ['alice', '@hubot add bob as owner story 123456789']
+    #         ['hubot', '@alice bob is now an owner for story 123456789']
+    #       ]
     it 'finishes a story', ->
       @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
         @room.user.say('alice', '@hubot finish story 123456789').then =>
