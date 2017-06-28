@@ -13,8 +13,8 @@
 #   hubot create me a story that's labeled <label1(, label 2...)> titled <title> - creates a new story with labels
 #   hubot create story project <project_id> labeled <label1(, label 2...)> titled <title> - full create story
 #   hubot what stories are undelivered this week - lists all stories (FUTURE)
-#   hubot start story <story_id> - starts the story
-#   hubot deliver story <story_id> - finishes the story
+#   hubot <start|finish|deliver|accept|reject> story <story_id> - sets the story state
+#   hubot add me as owner to story <story_id> - add yourself as a story owner
 #   hubot fetch my pt id - send you your pt id (DM)
 #   hubot show me my stories! - lists the stories assigned to you (DM)
 #   hubot show me my projects - lists the projects you are apart of
