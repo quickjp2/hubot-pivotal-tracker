@@ -124,7 +124,7 @@ describe 'pivotal-tracker', ->
         {kind:"story",
         id:123456789,
         current_state:"finished"})
-      .put('/stories/123456789',{estimate: 2})
+      .put('/projects/'+PROJECT_ID+'/stories/123456789',{estimate: 2})
       .reply(200,
         {kind:"story",
         id:123456789,

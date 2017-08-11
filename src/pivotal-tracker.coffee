@@ -275,7 +275,7 @@ module.exports = (robot) ->
     points = parseInt(msg.match[1], 10)
     storyID = msg.match[2]
     slackUserID = msg.message.user.id
-    tracker_projectID = robot.brain.get 'TrackerProjectID' + slackUserID
+    projectID = ""
     token = robot.brain.get 'TrackerToken' + slackUserID
     data = JSON.stringify {estimate: points}
     point_scale = []
@@ -290,9 +290,10 @@ module.exports = (robot) ->
           return
         else
           response = JSON.parse body
+          projectID = response['project_id']
           robot.logger.debug body
           # Get that project's point scale
-          robot.http("#{pivotalTrackerUrl}projects/#{response['project_id']}")
+          robot.http("#{pivotalTrackerUrl}projects/#{projectID}")
             .header('X-TrackerToken', token)
             .get() (err, res, body) ->
               if err
@@ -310,7 +311,7 @@ module.exports = (robot) ->
                   msg.reply "Potter, thats not in #{response['point_scale']}"
                   return
                 # Update points of story
-                robot.http(url)
+                robot.http("#{pivotalTrackerUrl}projects/#{projectID}/stories/#{storyID}")
                   .header('X-TrackerToken',token)
                   .put(data) (err, res, body) ->
                     if err
