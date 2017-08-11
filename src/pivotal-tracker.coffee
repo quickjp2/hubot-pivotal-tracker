@@ -272,7 +272,7 @@ module.exports = (robot) ->
           msg.reply "story "+response['id']+" is now "+response['current_state']+" :thumbs_down:"
   # Give points to stories
   robot.respond /(\d) points for story (\d*)/, (msg) ->
-    points = parseInt(msg.match[1], 10)
+    points = parseFloat(msg.match[1], 10)
     storyID = msg.match[2]
     slackUserID = msg.message.user.id
     projectID = ""
@@ -306,7 +306,7 @@ module.exports = (robot) ->
                 # Check points against scale
                 # msg.reply "#{response['point_scale'].split(',')}"
                 for point in response['point_scale'].split(',')
-	                point_scale.push parseInt(point, 10 )
+	                point_scale.push parseFloat(point, 10 )
                 unless points in point_scale
                   msg.reply "Potter, thats not in #{response['point_scale']}"
                   return
