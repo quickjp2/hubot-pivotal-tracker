@@ -313,6 +313,7 @@ module.exports = (robot) ->
                 # Update points of story
                 robot.http("#{pivotalTrackerUrl}projects/#{projectID}/stories/#{storyID}")
                   .header('X-TrackerToken',token)
+                  .header('Content-Type', 'application/json')
                   .put(data) (err, res, body) ->
                     if err
                       robot.logger.debug err
