@@ -79,7 +79,7 @@ module.exports = (robot) ->
           else
             response = JSON.parse body
             robot.logger.debug body
-            PTUserID = response['id'];
+            PTUserID = response['id']
             robot.brain.set('TrackerID'+slackUserID,PTUserID)
             robot.send {room: msg.message.user.id}, "Your ID is set to "+
               robot.brain.get('TrackerID'+slackUserID,PTUserID)
@@ -101,7 +101,7 @@ module.exports = (robot) ->
         else
           response = JSON.parse body
           robot.logger.debug body
-          PTUserID = response['id'];
+          PTUserID = response['id']
           robot.brain.set('TrackerID'+slackUserID,PTUserID)
           robot.send {room: slackUserID}, "I have set your token to "+
             robot.brain.get('TrackerToken'+slackUserID)+". Your PT ID is "+
@@ -270,6 +270,57 @@ module.exports = (robot) ->
           response = JSON.parse body
           robot.logger.debug body
           msg.reply "story "+response['id']+" is now "+response['current_state']+" :thumbs_down:"
+  # Give points to stories
+  robot.respond /(\d) points for story (\d*)/, (msg) ->
+    points = parseInt(msg.match[1], 10)
+    storyID = msg.match[2]
+    slackUserID = msg.message.user.id
+    tracker_projectID = robot.brain.get 'TrackerProjectID' + slackUserID
+    token = robot.brain.get 'TrackerToken' + slackUserID
+    data = JSON.stringify {estimate: points}
+    point_scale = []
+    # Get story's project
+    url = "#{pivotalTrackerUrl}stories/#{storyID}"
+    robot.http(url)
+      .header('X-TrackerToken',token)
+      .get() (err, res, body) ->
+        if err
+          robot.logger.debug err
+          msg.reply "Unable to locate the story's project..."
+          return
+        else
+          response = JSON.parse body
+          robot.logger.debug body
+          # Get that project's point scale
+          robot.http("#{pivotalTrackerUrl}projects/#{response['project_id']}")
+            .header('X-TrackerToken', token)
+            .get() (err, res, body) ->
+              if err
+                robot.logger.debug err
+                msg.reply "Unable to locate the project's point scale..."
+                return
+              else
+                response = JSON.parse body
+                robot.logger.debug body
+                # Check points against scale
+                # msg.reply "#{response['point_scale'].split(',')}"
+                for point in response['point_scale'].split(',')
+	                point_scale.push parseInt(point, 10 )
+                unless points in point_scale
+                  msg.reply "Potter, thats not in #{response['point_scale']}"
+                  return
+                # Update points of story
+                robot.http(url)
+                  .header('X-TrackerToken',token)
+                  .put(data) (err, res, body) ->
+                    if err
+                      robot.logger.debug err
+                      msg.reply "Unable to update the story..."
+                      return
+                    else
+                      response = JSON.parse body
+                      robot.logger.debug body
+                      msg.reply "#{response['estimate']} points given to #{response['id']}"
 
   # Use provided labels with default project
   robot.respond /create[mea\s]*story[tha's\s]+labeled (.*\w*) titled (.*\w*)/i, (msg) ->

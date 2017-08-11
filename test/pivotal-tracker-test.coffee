@@ -19,7 +19,7 @@ describe 'pivotal-tracker', ->
     nock('https://www.pivotaltracker.com/services/v5')
       .matchHeader('X-TrackerToken','abcdefg123hijklmnop456789')
       .get('/me')
-      .times(5)
+      .times(6)
       .reply(200,
         {api_token: "VadersToken",
         created_at: "2016-12-06T12:00:05Z",
@@ -58,6 +58,13 @@ describe 'pivotal-tracker', ->
         },
         updated_at: "2016-12-06T12:00:10Z",
         username: "vader"})
+      .get('/projects/'+PROJECT_ID)
+      .reply(200,
+        {
+          id: PROJECT_ID
+          point_scale: "0,1,2,3",
+          point_scale_is_custom: false
+        })
       .post('/projects/'+PROJECT_ID+'/stories',{current_state:'unstarted',estimate:1,name:'need to make something simple'})
       .reply(200,
         {kind:"story",
@@ -105,9 +112,11 @@ describe 'pivotal-tracker', ->
         id:123456789,
         current_state:"delivered"})
       .get('/stories/123456789')
+      .times(2)
       .reply(200,
         {kind:"story",
         id:123456789,
+        project_id: PROJECT_ID,
         owner_ids: [],
         current_state:"delivered"})
       .put('/stories/123456789',{current_state:"finished"})
@@ -115,6 +124,11 @@ describe 'pivotal-tracker', ->
         {kind:"story",
         id:123456789,
         current_state:"finished"})
+      .put('/stories/123456789',{estimate: 2})
+      .reply(200,
+        {kind:"story",
+        id:123456789,
+        estimate: 2})
       .put('/stories/123456789',{current_state:"accepted"})
       .reply(200,
         {kind:"story",
@@ -348,6 +362,15 @@ describe 'pivotal-tracker', ->
             ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
             ['alice', '@hubot reject story 123456789']
             ['hubot', '@alice story 123456789 is now rejected :thumbs_down:']
+          ]
+    it 'gives points to a story', ->
+      @room.user.say('alice', '@hubot add me to pt project id:7654321 using token:abcdefg123hijklmnop456789').then =>
+        @room.user.say('alice', '@hubot 2 points for story 123456789').then =>
+          expect(@room.messages).to.eql [
+            ['alice', '@hubot add me to pt project id:7654321 using token:abcdefg123hijklmnop456789']
+            ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
+            ['alice', '@hubot 2 points for story 123456789']
+            ['hubot', '@alice 2 points given to 123456789']
           ]
     it 'shows you your stories', ->
       @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
