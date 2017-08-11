@@ -1,7 +1,7 @@
 {
   "name": "hubot-pivotal-tracker",
   "description": "A module to enable interactions with pivotal tracker",
-  "version": "2.9.1",
+  "version": "2.9.2",
   "author": "JP Quicksall <john.paul.quicksall@gmail.com>",
   "license": "MIT",
   "keywords": "hubot, hubot-scripts, pivotal, pivotal-tracker",
