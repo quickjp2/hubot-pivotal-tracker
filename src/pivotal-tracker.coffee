@@ -46,15 +46,15 @@ createStory = (robot, msg, token, title, project, labels = null) ->
   robot.logger.debug(url)
   robot.http(url)
     .header('Content-Type', 'application/json')
-    .header('X-TrackerToken',token)
+    .header('X-TrackerToken', token)
     .post(JSON.stringify(data)) (err, res, body) ->
       if err
         robot.logger.error err
       else
         response = JSON.parse body
         robot.logger.debug body
-        msg.reply "story created with id:"+response['id']+
-          "! Check it out at "+response['url']+"!"
+        msg.reply "story created with id:" + response['id'] +
+          "! Check it out at " + response['url'] + "!"
 
 module.exports = (robot) ->
   robot.respond /hello/i, (msg) ->
@@ -65,14 +65,14 @@ module.exports = (robot) ->
 
 # Log my PT user ID
   robot.respond /fetch my pt id/i, (msg) ->
-    token = robot.brain.get 'TrackerToken'+msg.message.user.id
+    token = robot.brain.get 'TrackerToken' + msg.message.user.id
     slackUserID = msg.message.user.id
     if token == null
-      robot.send {room: msg.message.user.id}, "well this is awkward...you don't have a token set yet..."
+      robot.send { room: msg.message.user.id }, "well this is awkward...you don't have a token set yet..."
     else
-      robot.http(pivotalTrackerUrl+"me")
+      robot.http(pivotalTrackerUrl + "me")
         .header('Content-Type', 'application/json')
-        .header('X-TrackerToken',token)
+        .header('X-TrackerToken', token)
         .get() (err, res, body) ->
           if err
             robot.logger.debug err
@@ -80,21 +80,21 @@ module.exports = (robot) ->
             response = JSON.parse body
             robot.logger.debug body
             PTUserID = response['id']
-            robot.brain.set('TrackerID'+slackUserID,PTUserID)
-            robot.send {room: msg.message.user.id}, "Your ID is set to "+
-              robot.brain.get('TrackerID'+slackUserID,PTUserID)
+            robot.brain.set('TrackerID' + slackUserID, PTUserID)
+            robot.send { room: msg.message.user.id }, "Your ID is set to "+
+              robot.brain.get('TrackerID' + slackUserID, PTUserID)
 # Get and set your PT api token
   robot.respond /what is my pt token?/i, (msg) ->
-    tracker_user_token = robot.brain.get 'TrackerToken'+msg.message.user.id
-    robot.send {room: msg.message.user.id}, "Using "+tracker_user_token+" as your token..."
+    tracker_user_token = robot.brain.get 'TrackerToken' + msg.message.user.id
+    robot.send { room: msg.message.user.id }, "Using " + tracker_user_token + " as your token..."
 
   robot.respond /set my pt api token to:\s?(\w+)/i, (msg) ->
     token = msg.match[1]
     slackUserID = msg.message.user.id
-    robot.brain.set 'TrackerToken'+slackUserID, token
-    robot.http(pivotalTrackerUrl+"me")
+    robot.brain.set 'TrackerToken' + slackUserID, token
+    robot.http(pivotalTrackerUrl + "me")
       .header('Content-Type', 'application/json')
-      .header('X-TrackerToken',token)
+      .header('X-TrackerToken', token)
       .get() (err, res, body) ->
         if err
           robot.logger.debug err
@@ -102,33 +102,33 @@ module.exports = (robot) ->
           response = JSON.parse body
           robot.logger.debug body
           PTUserID = response['id']
-          robot.brain.set('TrackerID'+slackUserID,PTUserID)
-          robot.send {room: slackUserID}, "I have set your token to "+
-            robot.brain.get('TrackerToken'+slackUserID)+". Your PT ID is "+
-            robot.brain.get('TrackerID'+slackUserID)
+          robot.brain.set('TrackerID' + slackUserID, PTUserID)
+          robot.send { room: slackUserID }, "I have set your token to "+
+            robot.brain.get('TrackerToken' + slackUserID) + ". Your PT ID is " +
+            robot.brain.get('TrackerID' + slackUserID)
 
 # Get and set your PT Project ID
   robot.respond /what is my pt project id?/i, (msg) ->
-    tracker_projectID = robot.brain.get 'TrackerProjectID'+msg.message.user.id
-    robot.send {room: msg.message.user.id}, "Using "+tracker_projectID+" as your pt project..."
+    tracker_projectID = robot.brain.get 'TrackerProjectID' + msg.message.user.id
+    robot.send { room: msg.message.user.id }, "Using #{tracker_projectID} as your pt project..."
 
   robot.respond /set my pt project to id:(\d+)/i, (msg) ->
     projectID = msg.match[1]
     slackUserID = msg.message.user.id
-    robot.brain.set 'TrackerProjectID'+slackUserID, projectID
-    robot.send {room: slackUserID}, "I have set your pt project to "+
-      robot.brain.get 'TrackerProjectID'+slackUserID
+    robot.brain.set 'TrackerProjectID' + slackUserID, projectID
+    robot.send { room: slackUserID }, "I have set your pt project to " +
+      robot.brain.get 'TrackerProjectID' + slackUserID
 
 # One liners for the win!
   robot.respond /add me to pt project id:\s?(\w+) using token:\s?(\w+)/i, (msg) ->
     tracker_projectID = msg.match[1]
     token = msg.match[2]
     slackUserID = msg.message.user.id
-    robot.brain.set 'TrackerProjectID'+slackUserID, tracker_projectID
-    robot.brain.set 'TrackerToken'+slackUserID, token
-    robot.http(pivotalTrackerUrl+"me")
+    robot.brain.set 'TrackerProjectID' + slackUserID, tracker_projectID
+    robot.brain.set 'TrackerToken' + slackUserID, token
+    robot.http(pivotalTrackerUrl + "me")
       .header('Content-Type', 'application/json')
-      .header('X-TrackerToken',token)
+      .header('X-TrackerToken', token)
       .get() (err, res, body) ->
         if err
           robot.logger.debug err
@@ -136,24 +136,24 @@ module.exports = (robot) ->
           response = JSON.parse body
           robot.logger.debug body
           PTUserID = response['id']
-          robot.brain.set('TrackerID'+slackUserID,PTUserID)
-          robot.send {room: slackUserID}, "I have set your token to "+
-            robot.brain.get('TrackerToken'+msg.message.user.id)+". Welcome to pt project "+
-            robot.brain.get('TrackerProjectID'+msg.message.user.id)+"! Your pt ID is "+
-            robot.brain.get('TrackerID'+msg.message.user.id)
+          robot.brain.set('TrackerID' + slackUserID, PTUserID)
+          robot.send { room: slackUserID }, "I have set your token to " +
+            robot.brain.get('TrackerToken' + msg.message.user.id) + ". Welcome to pt project " +
+            robot.brain.get('TrackerProjectID' + msg.message.user.id) + "! Your pt ID is " +
+            robot.brain.get('TrackerID' + msg.message.user.id)
 
   robot.respond /add me as owner to story (\d+)/i, (msg) ->
     storyID = msg.match[1]
     slackUserID = msg.message.user.id
-    tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
-    token = robot.brain.get 'TrackerToken'+slackUserID
+    tracker_projectID = robot.brain.get 'TrackerProjectID' + slackUserID
+    token = robot.brain.get 'TrackerToken' + slackUserID
     owners = []
-    owners.push(robot.brain.get('TrackerID'+slackUserID))
+    owners.push(robot.brain.get('TrackerID' + slackUserID))
     url = "#{pivotalTrackerUrl}stories/#{storyID}"
     robot.logger.debug url
     robot.http(url)
       .header('Content-Type', 'application/json')
-      .header('X-TrackerToken',token)
+      .header('X-TrackerToken', token)
       .get() (err, res, body) ->
         if err
           robot.logger.debug err
@@ -164,7 +164,7 @@ module.exports = (robot) ->
           data = JSON.stringify { owner_ids: owners }
           robot.http(url)
             .header('Content-Type', 'application/json')
-            .header('X-TrackerToken',token)
+            .header('X-TrackerToken', token)
             .put(data) (err, res, body) ->
               if err
                 robot.logger.debug err
@@ -177,99 +177,131 @@ module.exports = (robot) ->
   robot.respond /start story (\d+)/i, (msg) ->
     storyID = msg.match[1]
     slackUserID = msg.message.user.id
-    tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
-    token = robot.brain.get 'TrackerToken'+slackUserID
+    tracker_projectID = robot.brain.get 'TrackerProjectID' + slackUserID
+    token = robot.brain.get 'TrackerToken' + slackUserID
     owners = []
-    owners.push(robot.brain.get('TrackerID'+slackUserID))
-    data = JSON.stringify { current_state: 'started', owner_ids: owners}
+    owners.push(robot.brain.get('TrackerID' + slackUserID))
+    data = JSON.stringify { current_state: 'started', owner_ids: owners }
     url = "#{pivotalTrackerUrl}stories/#{storyID}"
     robot.logger.debug url
     robot.http(url)
       .header('Content-Type', 'application/json')
-      .header('X-TrackerToken',token)
+      .header('X-TrackerToken', token)
       .put(data) (err, res, body) ->
         if err
           robot.logger.debug err
         else
           response = JSON.parse body
           robot.logger.debug body
-          msg.reply "story " + response['id'] + " is now "+ response['current_state']
+          msg.reply "story " + response['id'] + " is now " + response['current_state']
   robot.respond /finish story (\d+)/i, (msg) ->
     storyID = msg.match[1]
     slackUserID = msg.message.user.id
-    tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
-    token = robot.brain.get 'TrackerToken'+slackUserID
-    data = JSON.stringify { current_state: 'finished'}
+    tracker_projectID = robot.brain.get 'TrackerProjectID' + slackUserID
+    token = robot.brain.get 'TrackerToken' + slackUserID
+    data = JSON.stringify { current_state: 'finished' }
     url = "#{pivotalTrackerUrl}stories/#{storyID}"
     robot.logger.debug url
     robot.http(url)
       .header('Content-Type', 'application/json')
-      .header('X-TrackerToken',token)
+      .header('X-TrackerToken', token)
       .put(data) (err, res, body) ->
         if err
           robot.logger.debug err
         else
           response = JSON.parse body
           robot.logger.debug body
-          msg.reply "story " + response['id'] + " is now "+ response['current_state']
+          msg.reply "story " + response['id'] + " is now " + response['current_state']
 
   robot.respond /deliver story (\d+)/i, (msg) ->
     storyID = msg.match[1]
     slackUserID = msg.message.user.id
-    tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
-    token = robot.brain.get 'TrackerToken'+slackUserID
-    data = JSON.stringify { current_state: 'delivered'}
+    tracker_projectID = robot.brain.get 'TrackerProjectID' + slackUserID
+    token = robot.brain.get 'TrackerToken' + slackUserID
+    data = JSON.stringify { current_state: 'delivered' }
     url = "#{pivotalTrackerUrl}stories/#{storyID}"
 
     robot.logger.debug url
     robot.http(url)
       .header('Content-Type', 'application/json')
-      .header('X-TrackerToken',token)
+      .header('X-TrackerToken', token)
       .put(data) (err, res, body) ->
         if err
           robot.logger.debug err
         else
           response = JSON.parse body
           robot.logger.debug body
-          msg.reply "story " + response['id'] + " is now "+ response['current_state']
+          msg.reply "story " + response['id'] + " is now " + response['current_state']
   robot.respond /accept story (\d+)/i, (msg) ->
     storyID = msg.match[1]
     slackUserID = msg.message.user.id
-    tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
-    token = robot.brain.get 'TrackerToken'+slackUserID
-    data = JSON.stringify { current_state: 'accepted'}
+    tracker_projectID = robot.brain.get 'TrackerProjectID' + slackUserID
+    token = robot.brain.get 'TrackerToken' + slackUserID
+    data = JSON.stringify { current_state: 'accepted' }
     url = "#{pivotalTrackerUrl}stories/#{storyID}"
 
     robot.logger.debug url
     robot.http(url)
       .header('Content-Type', 'application/json')
-      .header('X-TrackerToken',token)
+      .header('X-TrackerToken', token)
       .put(data) (err, res, body) ->
         if err
           robot.logger.debug err
         else
           response = JSON.parse body
           robot.logger.debug body
-          msg.reply "story "+response['id']+" is now "+response['current_state']+" :thumbs_up:"
+          msg.reply "story #{response['id']} is now #{response['current_state']} :thumbs_up:"
   robot.respond /reject story (\d+)/i, (msg) ->
     storyID = msg.match[1]
     slackUserID = msg.message.user.id
-    tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
-    token = robot.brain.get 'TrackerToken'+slackUserID
-    data = JSON.stringify { current_state: 'rejected'}
+    tracker_projectID = robot.brain.get 'TrackerProjectID' + slackUserID
+    token = robot.brain.get 'TrackerToken' + slackUserID
+    data = JSON.stringify { current_state: 'rejected' }
     url = "#{pivotalTrackerUrl}stories/#{storyID}"
 
     robot.logger.debug url
     robot.http(url)
       .header('Content-Type', 'application/json')
-      .header('X-TrackerToken',token)
+      .header('X-TrackerToken', token)
       .put(data) (err, res, body) ->
         if err
           robot.logger.debug err
         else
           response = JSON.parse body
           robot.logger.debug body
-          msg.reply "story "+response['id']+" is now "+response['current_state']+" :thumbs_down:"
+          msg.reply "story #{response['id']} is now #{response['current_state']} :thumbs_down:"
+  # Let's comment!
+  robot.respond /comment on story (\d+):\s?(.*)/i, (msg) ->
+    storyID = msg.match[1]
+    comment = msg.match[2]
+    slackUserID = msg.message.user.id
+    tracker_projectID = robot.brain.get 'TrackerProjectID' + slackUserID
+    token = robot.brain.get 'TrackerToken' + slackUserID
+    data = JSON.stringify { text: comment }
+    url = "#{pivotalTrackerUrl}stories/#{storyID}"
+    robot.logger.debug url
+    robot.http(url)
+      .header('Content-Type', 'application/json')
+      .header('X-TrackerToken', token)
+      .get() (err, res, body) ->
+        if err
+          robot.logger.debug err
+        else
+          response = JSON.parse body
+          robot.logger.debug body
+          commentUrl = "#{pivotalTrackerUrl}projects/#{response['project_id']}/stories/#{storyID}/comments"
+          # msg.send "Sending comment to url: #{commentUrl}"
+          robot.http(commentUrl)
+            .header('Content-Type', 'application/json')
+            .header('X-TrackerToken', token)
+            .post(data) (err, res, body) ->
+              if err
+                robot.logger.debug err
+              else
+                response = JSON.parse body
+                robot.logger.debug body
+                msg.send "Comment added with ID: #{response['id']}"
+
   # Give points to stories
   robot.respond /(\d) points for story (\d*)/, (msg) ->
     points = parseFloat(msg.match[1], 10)
@@ -277,20 +309,20 @@ module.exports = (robot) ->
     slackUserID = msg.message.user.id
     projectID = ""
     token = robot.brain.get 'TrackerToken' + slackUserID
-    data = JSON.stringify {estimate: points}
+    data = JSON.stringify { estimate: points }
     point_scale = []
     # Get story's project
     url = "#{pivotalTrackerUrl}stories/#{storyID}"
     robot.http(url)
-      .header('X-TrackerToken',token)
+      .header('X-TrackerToken', token)
       .get() (err, res, body) ->
         if err
           robot.logger.debug err
           msg.reply "Unable to locate the story's project..."
           return
         else
-          response = JSON.parse body
-          projectID = response['project_id']
+          response1 = JSON.parse body
+          projectID = response1['project_id']
           robot.logger.debug body
           # Get that project's point scale
           robot.http("#{pivotalTrackerUrl}projects/#{projectID}")
@@ -301,18 +333,18 @@ module.exports = (robot) ->
                 msg.reply "Unable to locate the project's point scale..."
                 return
               else
-                response = JSON.parse body
+                response2 = JSON.parse body
                 robot.logger.debug body
                 # Check points against scale
                 # msg.reply "#{response['point_scale'].split(',')}"
-                for point in response['point_scale'].split(',')
+                for point in response2['point_scale'].split(',')
 	                point_scale.push parseFloat(point, 10 )
                 unless points in point_scale
-                  msg.reply "Potter, thats not in #{response['point_scale']}"
+                  msg.reply "Potter, thats not in #{response2['point_scale']}"
                   return
                 # Update points of story
                 robot.http("#{pivotalTrackerUrl}projects/#{projectID}/stories/#{storyID}")
-                  .header('X-TrackerToken',token)
+                  .header('X-TrackerToken', token)
                   .header('Content-Type', 'application/json')
                   .put(data) (err, res, body) ->
                     if err
@@ -320,9 +352,9 @@ module.exports = (robot) ->
                       msg.reply "Unable to update the story..."
                       return
                     else
-                      response = JSON.parse body
+                      response3 = JSON.parse body
                       robot.logger.debug body
-                      msg.reply "#{response['estimate']} points given to #{response['id']}"
+                      msg.reply "#{response3['estimate']} points given to #{response3['id']}"
 
   # Use provided labels with default project
   robot.respond /create[mea\s]*story[tha's\s]+labeled (.*\w*) titled (.*\w*)/i, (msg) ->
@@ -330,7 +362,7 @@ module.exports = (robot) ->
     labels = msg.match[1].split ", "
     slackUserID = msg.message.user.id
     token = robot.brain.get 'TrackerToken' + slackUserID
-    project = robot.brain.get 'TrackerProjectID'+slackUserID
+    project = robot.brain.get 'TrackerProjectID' + slackUserID
     createStory robot, msg, token, name, project, labels
 
   # Use provided project, label(s) and title
@@ -346,23 +378,23 @@ module.exports = (robot) ->
   robot.respond /create[mea\s]+story titled (.*\w*)/i, (msg) ->
     name = msg.match[1]
     slackUserID = msg.message.user.id
-    token = robot.brain.get 'TrackerToken'+slackUserID
-    project = robot.brain.get 'TrackerProjectID'+slackUserID
+    token = robot.brain.get 'TrackerToken' + slackUserID
+    project = robot.brain.get 'TrackerProjectID' + slackUserID
     createStory robot, msg, token, name, project
 
   # Let's do something cool and output the stories
   robot.respond /show[mea\s]*my stories[!]?/i, (msg) ->
     slackUserID = msg.message.user.id
-    token = robot.brain.get 'TrackerToken'+slackUserID
+    token = robot.brain.get 'TrackerToken' + slackUserID
     # tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
     # url = pivotalTrackerUrl+"projects/"+tracker_projectID+"/stories"
     my_stories = {}
     i = 1
     requests = 0
     robot.logger.debug "Vars: token:#{robot.brain.get('TrackerID'+slackUserID)}"
-    robot.http(pivotalTrackerUrl+"me")
+    robot.http(pivotalTrackerUrl + "me")
       .header('Content-Type', 'application/json')
-      .header('X-TrackerToken',token)
+      .header('X-TrackerToken', token)
       .get() (err, res, body) ->
         if err
           robot.logger.error err
@@ -373,9 +405,9 @@ module.exports = (robot) ->
             requests++
             url = "#{pivotalTrackerUrl}projects/#{project['project_id']}/stories"
             robot.logger.debug(url)
-            robot.http(url+"?date_format=millis&filter=current_state:unstarted,started,finished,delivered%20and%20owner:#{robot.brain.get('TrackerID'+slackUserID)}")
+            robot.http(url + "?date_format=millis&filter=current_state:unstarted,started,finished,delivered%20and%20owner:#{robot.brain.get('TrackerID'+slackUserID)}")
               .header('Content-Type', 'application/json')
-              .header('X-TrackerToken',token)
+              .header('X-TrackerToken', token)
               .get() (err, res, body) ->
                 if err
                   robot.logger.error err
@@ -395,11 +427,11 @@ module.exports = (robot) ->
 
   robot.respond /show[mea\s]*my projects/i, (msg) ->
     slackUserID = msg.message.user.id
-    token = robot.brain.get 'TrackerToken'+slackUserID
+    token = robot.brain.get 'TrackerToken' + slackUserID
     my_projects = {}
-    robot.http(pivotalTrackerUrl+"me")
+    robot.http(pivotalTrackerUrl + "me")
       .header('Content-Type', 'application/json')
-      .header('X-TrackerToken',token)
+      .header('X-TrackerToken', token)
       .get() (err, res, body) ->
         if err
           robot.logger.error err
@@ -413,14 +445,14 @@ module.exports = (robot) ->
 
   robot.respond /show epics in project (.*)\??/i, (msg) ->
     slackUserID = msg.message.user.id
-    token = robot.brain.get 'TrackerToken'+slackUserID
+    token = robot.brain.get 'TrackerToken' + slackUserID
     project = msg.match[1]
     my_epics = {}
-    url = pivotalTrackerUrl+"projects/"+project+"/epics"
+    url = "#{pivotalTrackerUrl}projects/#{project}/epics"
     robot.logger.debug(url)
     robot.http(url)
       .header('Content-Type', 'application/json')
-      .header('X-TrackerToken',token)
+      .header('X-TrackerToken', token)
       .get() (err, res, body) ->
         if err
           robot.logger.error err
@@ -436,14 +468,14 @@ module.exports = (robot) ->
           msg.send JSON.stringify(my_epics, null, 1)
   robot.respond /show labels in project (.*)\??/i, (msg) ->
     slackUserID = msg.message.user.id
-    token = robot.brain.get 'TrackerToken'+slackUserID
+    token = robot.brain.get 'TrackerToken' + slackUserID
     project = msg.match[1]
     my_labels = []
-    url = pivotalTrackerUrl+"projects/"+project+"/labels"
+    url = "#{pivotalTrackerUrl}projects/#{project}/labels"
     robot.logger.debug(url)
     robot.http(url)
       .header('Content-Type', 'application/json')
-      .header('X-TrackerToken',token)
+      .header('X-TrackerToken', token)
       .get() (err, res, body) ->
         if err
           robot.logger.error err

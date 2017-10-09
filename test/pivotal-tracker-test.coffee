@@ -17,159 +17,187 @@ describe 'pivotal-tracker', ->
   beforeEach ->
     nock.disableNetConnect()
     nock('https://www.pivotaltracker.com/services/v5')
-      .matchHeader('X-TrackerToken','abcdefg123hijklmnop456789')
+      .matchHeader('X-TrackerToken', 'abcdefg123hijklmnop456789')
       .get('/me')
       .times(6)
       .reply(200,
-        {api_token: "VadersToken",
-        created_at: "2016-12-06T12:00:05Z",
-        email: "vader@deathstar.mil",
-        has_google_identity: false,
-        id:101,
-        initials: "DV",
-        kind: "me",
-        name: "Darth Vader",
-        projects:[{
-          kind: "membership_summary",
-          id:108,
-          project_id:PROJECT_ID,
-          project_name: "Learn About the Force",
-          project_color: "8100ea",
-          favorite:false,
-          role: "owner",
-          last_viewed_at: "2016-12-06T12:00:00Z"
-        },
         {
-          kind: "membership_summary",
-          id:109,
-          project_id:PROJECT_ID+1,
-          project_name: "Death Star",
-          project_color: "8100ea",
-          favorite:false,
-          role: "member",
-          last_viewed_at: "2016-12-06T12:00:00Z"
-        }
-        ],
+          api_token: "VadersToken",
+          created_at: "2016-12-06T12:00:05Z",
+          email: "vader@deathstar.mil",
+          has_google_identity: false,
+          id: 101,
+          initials: "DV",
+          kind: "me",
+          name: "Darth Vader",
+          projects: [{
+            kind: "membership_summary",
+            id: 108,
+            project_id: PROJECT_ID,
+            project_name: "Learn About the Force",
+            project_color: "8100ea",
+            favorite: false,
+            role: "owner",
+            last_viewed_at: "2016-12-06T12:00:00Z"
+          },
+          {
+            kind: "membership_summary",
+            id: 109,
+            project_id: PROJECT_ID + 1,
+            project_name: "Death Star",
+            project_color: "8100ea",
+            favorite: false,
+            role: "member",
+            last_viewed_at: "2016-12-06T12:00:00Z"
+          }],
         receives_in_app_notifications: true,
-        time_zone:{
+        time_zone: {
           kind: "time_zone",
           olson_name: "America/Los_Angeles",
           offset: "-08:00"
         },
         updated_at: "2016-12-06T12:00:10Z",
-        username: "vader"})
-      .get('/projects/'+PROJECT_ID)
+        username: "vader" })
+      .get('/projects/' + PROJECT_ID)
       .reply(200,
         {
           id: PROJECT_ID
           point_scale: "0,1,2,3",
           point_scale_is_custom: false
         })
-      .post('/projects/'+PROJECT_ID+'/stories',{current_state:'unstarted',estimate:1,name:'need to make something simple'})
+      .post('/projects/' + PROJECT_ID + '/stories', { current_state: 'unstarted', estimate: 1, name: 'need to make something simple' })
       .reply(200,
-        {kind:"story",
-        id:123456789,
-        project_id: PROJECT_ID,
-        name:"need to make something simple",
-        story_type:"feature",
-        current_state:"unstarted",
-        estimate:1,
-        requested_by_id:1234567,
-        owner_ids:[],
-        labels:[],
-        created_at:"2016-12-09T22:35:24Z",
-        updated_at:"2016-12-09T22:35:24Z",
-        url:"https://www.pivotaltracker.com/story/show/123456789"})
-      .post('/projects/'+PROJECT_ID+'/stories',{current_state:'unstarted',estimate:1,name:'need to make something simple',labels:['this is a test']})
+        {
+          kind: "story",
+          id: 123456789,
+          project_id: PROJECT_ID,
+          name: "need to make something simple",
+          story_type: "feature",
+          current_state: "unstarted",
+          estimate: 1,
+          requested_by_id: 1234567,
+          owner_ids: [],
+          labels: [],
+          created_at: "2016-12-09T22:35:24Z",
+          updated_at: "2016-12-09T22:35:24Z",
+          url: "https://www.pivotaltracker.com/story/show/123456789"
+        })
+      .post('/projects/' + PROJECT_ID + '/stories', { current_state: 'unstarted', estimate: 1, name: 'need to make something simple', labels: ['this is a test'] })
       .times(2)
       .reply(200,
-        {kind:"story",
-        id:123456789,
-        project_id: PROJECT_ID,
-        name:"need to make something simple",
-        story_type:"feature",
-        current_state:"unstarted",
-        estimate:1,
-        requested_by_id:1234567,
-        owner_ids:[],
-        labels:["this is a test"],
-        created_at:"2016-12-09T22:35:24Z",
-        updated_at:"2016-12-09T22:35:24Z",
-        url:"https://www.pivotaltracker.com/story/show/123456789"})
-      .put('/stories/123456789',{current_state:"started"})
+        {
+          kind: "story",
+          id: 123456789,
+          project_id: PROJECT_ID,
+          name: "need to make something simple",
+          story_type: "feature",
+          current_state: "unstarted",
+          estimate: 1,
+          requested_by_id: 1234567,
+          owner_ids: [],
+          labels: ["this is a test"],
+          created_at: "2016-12-09T22:35:24Z",
+          updated_at: "2016-12-09T22:35:24Z",
+          url: "https://www.pivotaltracker.com/story/show/123456789"
+        })
+      .put('/stories/123456789', { current_state: "started" })
       .reply(200,
-        {kind:"story",
-        id:123456789,
-        current_state:"started"})
-      .put('/stories/123456789',{current_state:"delivered"})
+        {
+          kind: "story",
+          id: 123456789,
+          current_state: "started"
+        })
+      .put('/stories/123456789', { current_state: "delivered" })
       .reply(200,
-        {kind:"story",
-        id:123456789,
-        current_state:"delivered"})
-      .put('/stories/123456789',{ owner_ids:[101]})
+        {
+          kind: "story",
+          id: 123456789,
+          current_state: "delivered"
+        })
+      .put('/stories/123456789', { owner_ids: [101] })
       .reply(200,
-        {kind:"story",
-        id:123456789,
-        current_state:"delivered"})
+        {
+          kind: "story",
+          id: 123456789,
+          current_state: "delivered"
+        })
       .get('/stories/123456789')
-      .times(2)
-      .reply(200,
-        {kind:"story",
-        id:123456789,
-        project_id: PROJECT_ID,
-        owner_ids: [],
-        current_state:"delivered"})
-      .put('/stories/123456789',{current_state:"finished"})
-      .reply(200,
-        {kind:"story",
-        id:123456789,
-        current_state:"finished"})
-      .put('/projects/'+PROJECT_ID+'/stories/123456789',{estimate: 2})
-      .reply(200,
-        {kind:"story",
-        id:123456789,
-        estimate: 2})
-      .put('/stories/123456789',{current_state:"accepted"})
-      .reply(200,
-        {kind:"story",
-        id:123456789,
-        current_state:"accepted"})
-      .put('/stories/123456789',{current_state:"rejected"})
-      .reply(200,
-        {kind:"story",
-        id:123456789,
-        current_state:"rejected"})
-      .get('/projects/'+PROJECT_ID+'/stories?date_format=millis&filter=current_state%3Aunstarted%2Cstarted%2Cfinished%2Cdelivered%20and%20owner%3A101')
       .times(3)
       .reply(200,
-        [{kind:"story",
-        id:123456789,
-        project_id: PROJECT_ID,
-        name:"need to make something simple",
-        current_state:"started",
-        owner_ids:[101]},
-        {kind:"story",
-        id:123456781,
-        project_id: PROJECT_ID,
-        name:"need to make something simple 2",
-        current_state:"unstarted",
-        owner_ids:[102]}])
+        {
+          kind: "story",
+          id: 123456789,
+          project_id: PROJECT_ID,
+          owner_ids: [],
+          current_state: "delivered"
+        })
+      .put('/stories/123456789', { current_state: "finished" })
+      .reply(200,
+        {
+          kind: "story",
+          id: 123456789,
+          current_state: "finished"
+        })
+      .put('/projects/' + PROJECT_ID + '/stories/123456789', { estimate: 2 })
+      .reply(200,
+        {
+          kind: "story",
+          id: 123456789,
+          estimate: 2
+        })
+      .put('/stories/123456789', { current_state: "accepted" })
+      .reply(200,
+        {
+          kind: "story",
+          id: 123456789,
+          current_state: "accepted"
+        })
+      .put('/stories/123456789', { current_state: "rejected" })
+      .reply(200,
+        {
+          kind: "story",
+          id: 123456789,
+          current_state: "rejected"
+        })
+      .get('/projects/' + PROJECT_ID + '/stories?date_format=millis&filter=current_state%3Aunstarted%2Cstarted%2Cfinished%2Cdelivered%20and%20owner%3A101')
+      .times(3)
+      .reply(200,
+        [{
+          kind: "story",
+          id: 123456789,
+          project_id: PROJECT_ID,
+          name: "need to make something simple",
+          current_state: "started",
+          owner_ids: [101]
+        },
+        {
+          kind: "story",
+          id: 123456781,
+          project_id: PROJECT_ID,
+          name: "need to make something simple 2",
+          current_state: "unstarted",
+          owner_ids: [102]
+        }])
       .get('/projects/7654322/stories?date_format=millis&filter=current_state%3Aunstarted%2Cstarted%2Cfinished%2Cdelivered%20and%20owner%3A101')
       .times(3)
       .reply(200,
-        [{kind:"story",
-        id:123456782,
-        project_id: PROJECT_ID+1,
-        name:"need to make something simple 3",
-        current_state:"started",
-        owner_ids:[101]},
-        {kind:"story",
-        id:123456783,
-        project_id: PROJECT_ID+1,
-        name:"need to make something simple 4",
-        current_state:"unstarted",
-        owner_ids:[102]}])
-      .get('/projects/'+PROJECT_ID+'/epics')
+        [{
+          kind: "story",
+          id: 123456782,
+          project_id: PROJECT_ID + 1,
+          name: "need to make something simple 3",
+          current_state: "started",
+          owner_ids: [101]
+        },
+        {
+          kind: "story",
+          id: 123456783,
+          project_id: PROJECT_ID + 1,
+          name: "need to make something simple 4",
+          current_state: "unstarted",
+          owner_ids: [102]
+        }])
+      .get('/projects/' + PROJECT_ID + '/epics')
       .times(1)
       .reply(200,
         [{
@@ -182,7 +210,7 @@ describe 'pivotal-tracker', ->
           url: "http://localhost/epic/show/555",
           label: {
             id: 2017,
-            project_id:PROJECT_ID,
+            project_id: PROJECT_ID,
             kind: "label",
             name: "sanitation",
             created_at: "2017-05-09T12:00:00Z",
@@ -216,7 +244,8 @@ describe 'pivotal-tracker', ->
           name: "mnt",
           created_at: 1494331200000,
           updated_at: 1494331200000
-        },{
+        },
+        {
           kind: "label",
           id: 2017,
           project_id: PROJECT_ID,
@@ -224,6 +253,18 @@ describe 'pivotal-tracker', ->
           created_at: 1494331200000,
           updated_at: 1494331200000
         }])
+      .post("/projects/#{PROJECT_ID}/stories/123456789/comments")
+      .times(1)
+      .reply(200,
+        {
+          created_at: "2017-09-26T12:00:00Z",
+          id: 300,
+          kind: "comment",
+          person_id: 101,
+          story_id: 123456789,
+          text: "If this is a consular ship, then where is the ambassador?",
+          updated_at: "2017-09-26T12:00:00Z"
+        })
     @room = helper.createRoom()
     @robot =
       respond: sinon.spy()
@@ -236,30 +277,30 @@ describe 'pivotal-tracker', ->
     it 'sets an API token', ->
       @room.user.say('alice', '@hubot set my pt api token to:abcdefg123hijklmnop456789').then =>
         expect(@room.messages).to.eql [
-          ['alice','@hubot set my pt api token to:abcdefg123hijklmnop456789']
-          ['hubot','I have set your token to abcdefg123hijklmnop456789. Your PT ID is 101']
+          ['alice', '@hubot set my pt api token to:abcdefg123hijklmnop456789']
+          ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Your PT ID is 101']
         ]
     it 'remembers an API token', ->
       @room.user.say('alice', '@hubot set my pt api token to:abcdefg123hijklmnop456789').then =>
         @room.user.say('alice', '@hubot what is my pt token?').then =>
           expect(@room.messages).to.eql [
-            ['alice','@hubot set my pt api token to:abcdefg123hijklmnop456789']
-            ['hubot','I have set your token to abcdefg123hijklmnop456789. Your PT ID is 101']
+            ['alice', '@hubot set my pt api token to:abcdefg123hijklmnop456789']
+            ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Your PT ID is 101']
             ['alice', '@hubot what is my pt token?']
             ['hubot', 'Using abcdefg123hijklmnop456789 as your token...']
           ]
     it 'sets a PT project ID', ->
       @room.user.say('alice', '@hubot set my pt project to id:7654321').then =>
         expect(@room.messages).to.eql [
-          ['alice','@hubot set my pt project to id:7654321']
-          ['hubot','I have set your pt project to 7654321']
+          ['alice', '@hubot set my pt project to id:7654321']
+          ['hubot', 'I have set your pt project to 7654321']
         ]
     it 'remembers a PT project ID', ->
       @room.user.say('alice', '@hubot set my pt project to id:7654321').then =>
         @room.user.say('alice', '@hubot what is my pt project id?').then =>
           expect(@room.messages).to.eql [
-            ['alice','@hubot set my pt project to id:7654321']
-            ['hubot','I have set your pt project to 7654321']
+            ['alice', '@hubot set my pt project to id:7654321']
+            ['hubot', 'I have set your pt project to 7654321']
             ['alice', '@hubot what is my pt project id?']
             ['hubot', 'Using 7654321 as your pt project...']
           ]
@@ -379,7 +420,7 @@ describe 'pivotal-tracker', ->
             ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
             ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
             ['alice', '@hubot show me my stories!']
-            ['hubot', {"room": "alice"}]
+            ['hubot', { "room": "alice" }]
             ['hubot', '{\n \"1\": \"need to make something simple - ID: 123456789, State: started, Project: 7654321\",\n \"2\": \"need to make something simple 2 - ID: 123456781, State: unstarted, Project: 7654321\",\n \"3\": \"need to make something simple 3 - ID: 123456782, State: started, Project: 7654322\",\n \"4\": \"need to make something simple 4 - ID: 123456783, State: unstarted, Project: 7654322\"\n}']
           ]
 
@@ -391,7 +432,7 @@ describe 'pivotal-tracker', ->
             ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
             ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
             ['alice', '@hubot show me my projects']
-            ['hubot', {"room": "alice"}]
+            ['hubot', { "room": "alice" }]
             ['hubot', '{\n \"Learn About the Force\": 7654321,\n \"Death Star\": 7654322\n}']
           ]
     it 'shows a list of epics in a project', ->
@@ -411,6 +452,15 @@ describe 'pivotal-tracker', ->
             ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
             ['alice', '@hubot show labels in project 7654321']
             ['hubot', '[\n \"mnt\",\n \"sanitation\"\n]']
+          ]
+    it 'sends a comment to a story', ->
+      @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
+        @room.user.say('alice', '@hubot comment on story 123456789: If this is a consular ship, then where is the ambassador?').then =>
+          expect(@room.messages).to.eql [
+            ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
+            ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
+            ['alice', '@hubot comment on story 123456789: If this is a consular ship, then where is the ambassador?']
+            ['hubot', 'Comment added with ID: 300']
           ]
   #   it 'responds to hello', ->
   #     @room.user.say('alice', '@hubot hello').then =>
