@@ -46,15 +46,15 @@ createStory = (robot, msg, token, title, project, labels = null) ->
   robot.logger.debug(url)
   robot.http(url)
     .header('Content-Type', 'application/json')
-    .header('X-TrackerToken',token)
+    .header('X-TrackerToken', token)
     .post(JSON.stringify(data)) (err, res, body) ->
       if err
         robot.logger.error err
       else
         response = JSON.parse body
         robot.logger.debug body
-        msg.reply "story created with id:"+response['id']+
-          "! Check it out at "+response['url']+"!"
+        msg.reply "story created with id:" + response['id'] +
+          "! Check it out at " + response['url'] + "!"
 
 module.exports = (robot) ->
   robot.respond /hello/i, (msg) ->
@@ -65,14 +65,14 @@ module.exports = (robot) ->
 
 # Log my PT user ID
   robot.respond /fetch my pt id/i, (msg) ->
-    token = robot.brain.get 'TrackerToken'+msg.message.user.id
+    token = robot.brain.get 'TrackerToken' + msg.message.user.id
     slackUserID = msg.message.user.id
     if token == null
-      robot.send {room: msg.message.user.id}, "well this is awkward...you don't have a token set yet..."
+      robot.send { room: msg.message.user.id }, "well this is awkward...you don't have a token set yet..."
     else
-      robot.http(pivotalTrackerUrl+"me")
+      robot.http(pivotalTrackerUrl + "me")
         .header('Content-Type', 'application/json')
-        .header('X-TrackerToken',token)
+        .header('X-TrackerToken', token)
         .get() (err, res, body) ->
           if err
             robot.logger.debug err
@@ -80,12 +80,12 @@ module.exports = (robot) ->
             response = JSON.parse body
             robot.logger.debug body
             PTUserID = response['id']
-            robot.brain.set('TrackerID'+slackUserID,PTUserID)
-            robot.send {room: msg.message.user.id}, "Your ID is set to "+
-              robot.brain.get('TrackerID'+slackUserID,PTUserID)
+            robot.brain.set('TrackerID' + slackUserID, PTUserID)
+            robot.send { room: msg.message.user.id }, "Your ID is set to "+
+              robot.brain.get('TrackerID' + slackUserID, PTUserID)
 # Get and set your PT api token
   robot.respond /what is my pt token?/i, (msg) ->
-    tracker_user_token = robot.brain.get 'TrackerToken'+msg.message.user.id
+    tracker_user_token = robot.brain.get 'TrackerToken' + msg.message.user.id
     robot.send {room: msg.message.user.id}, "Using "+tracker_user_token+" as your token..."
 
   robot.respond /set my pt api token to:\s?(\w+)/i, (msg) ->
@@ -270,6 +270,38 @@ module.exports = (robot) ->
           response = JSON.parse body
           robot.logger.debug body
           msg.reply "story "+response['id']+" is now "+response['current_state']+" :thumbs_down:"
+  # Let's comment!
+  robot.respond /comment on story (\d+):\s?(.*)/i, (msg) ->
+    storyID = msg.match[1]
+    comment = msg.match[2]
+    slackUserID = msg.message.user.id
+    tracker_projectID = robot.brain.get 'TrackerProjectID'+slackUserID
+    token = robot.brain.get 'TrackerToken'+slackUserID
+    data = JSON.stringify {text: comment}
+    url = "#{pivotalTrackerUrl}stories/#{storyID}"
+    robot.logger.debug url
+    robot.http(url)
+      .header('Content-Type', 'application/json')
+      .header('X-TrackerToken',token)
+      .get() (err, res, body) ->
+        if err
+          robot.logger.debug err
+        else
+          response = JSON.parse body
+          robot.logger.debug body
+          commentUrl = "#{pivotalTrackerUrl}projects/#{response['project_id']}/stories/#{storyID}/comments"
+          # msg.send "Sending comment to url: #{commentUrl}"
+          robot.http(commentUrl)
+            .header('Content-Type', 'application/json')
+            .header('X-TrackerToken', token)
+            .post(data) (err, res, body) ->
+              if err
+                robot.logger.debug err
+              else
+                response = JSON.parse body
+                robot.logger.debug body
+                msg.send "Comment added with ID: #{response['id']}"
+
   # Give points to stories
   robot.respond /(\d) points for story (\d*)/, (msg) ->
     points = parseFloat(msg.match[1], 10)
@@ -289,8 +321,8 @@ module.exports = (robot) ->
           msg.reply "Unable to locate the story's project..."
           return
         else
-          response = JSON.parse body
-          projectID = response['project_id']
+          response1 = JSON.parse body
+          projectID = response1['project_id']
           robot.logger.debug body
           # Get that project's point scale
           robot.http("#{pivotalTrackerUrl}projects/#{projectID}")
@@ -301,14 +333,14 @@ module.exports = (robot) ->
                 msg.reply "Unable to locate the project's point scale..."
                 return
               else
-                response = JSON.parse body
+                response2 = JSON.parse body
                 robot.logger.debug body
                 # Check points against scale
                 # msg.reply "#{response['point_scale'].split(',')}"
-                for point in response['point_scale'].split(',')
+                for point in response2['point_scale'].split(',')
 	                point_scale.push parseFloat(point, 10 )
                 unless points in point_scale
-                  msg.reply "Potter, thats not in #{response['point_scale']}"
+                  msg.reply "Potter, thats not in #{response2['point_scale']}"
                   return
                 # Update points of story
                 robot.http("#{pivotalTrackerUrl}projects/#{projectID}/stories/#{storyID}")
@@ -320,9 +352,9 @@ module.exports = (robot) ->
                       msg.reply "Unable to update the story..."
                       return
                     else
-                      response = JSON.parse body
+                      response3 = JSON.parse body
                       robot.logger.debug body
-                      msg.reply "#{response['estimate']} points given to #{response['id']}"
+                      msg.reply "#{response3['estimate']} points given to #{response3['id']}"
 
   # Use provided labels with default project
   robot.respond /create[mea\s]*story[tha's\s]+labeled (.*\w*) titled (.*\w*)/i, (msg) ->

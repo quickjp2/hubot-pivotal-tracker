@@ -17,41 +17,41 @@ describe 'pivotal-tracker', ->
   beforeEach ->
     nock.disableNetConnect()
     nock('https://www.pivotaltracker.com/services/v5')
-      .matchHeader('X-TrackerToken','abcdefg123hijklmnop456789')
+      .matchHeader('X-TrackerToken', 'abcdefg123hijklmnop456789')
       .get('/me')
       .times(6)
       .reply(200,
-        {api_token: "VadersToken",
-        created_at: "2016-12-06T12:00:05Z",
-        email: "vader@deathstar.mil",
-        has_google_identity: false,
-        id:101,
-        initials: "DV",
-        kind: "me",
-        name: "Darth Vader",
-        projects:[{
-          kind: "membership_summary",
-          id:108,
-          project_id:PROJECT_ID,
-          project_name: "Learn About the Force",
-          project_color: "8100ea",
-          favorite:false,
-          role: "owner",
-          last_viewed_at: "2016-12-06T12:00:00Z"
-        },
         {
-          kind: "membership_summary",
-          id:109,
-          project_id:PROJECT_ID+1,
-          project_name: "Death Star",
-          project_color: "8100ea",
-          favorite:false,
-          role: "member",
-          last_viewed_at: "2016-12-06T12:00:00Z"
-        }
-        ],
+          api_token: "VadersToken",
+          created_at: "2016-12-06T12:00:05Z",
+          email: "vader@deathstar.mil",
+          has_google_identity: false,
+          id: 101,
+          initials: "DV",
+          kind: "me",
+          name: "Darth Vader",
+          projects: [{
+            kind: "membership_summary",
+            id: 108,
+            project_id:PROJECT_ID,
+            project_name: "Learn About the Force",
+            project_color: "8100ea",
+            favorite:false,
+            role: "owner",
+            last_viewed_at: "2016-12-06T12:00:00Z"
+          },
+          {
+            kind: "membership_summary",
+            id: 109,
+            project_id: PROJECT_ID+1,
+            project_name: "Death Star",
+            project_color: "8100ea",
+            favorite: false,
+            role: "member",
+            last_viewed_at: "2016-12-06T12:00:00Z"
+          }],
         receives_in_app_notifications: true,
-        time_zone:{
+        time_zone: {
           kind: "time_zone",
           olson_name: "America/Los_Angeles",
           offset: "-08:00"
@@ -112,7 +112,7 @@ describe 'pivotal-tracker', ->
         id:123456789,
         current_state:"delivered"})
       .get('/stories/123456789')
-      .times(2)
+      .times(3)
       .reply(200,
         {kind:"story",
         id:123456789,
@@ -224,6 +224,18 @@ describe 'pivotal-tracker', ->
           created_at: 1494331200000,
           updated_at: 1494331200000
         }])
+      .post("/projects/#{PROJECT_ID}/stories/123456789/comments")
+      .times(1)
+      .reply(200,
+        {
+          created_at: "2017-09-26T12:00:00Z",
+          id: 300,
+          kind: "comment",
+          person_id: 101,
+          story_id: 123456789,
+          text: "If this is a consular ship, then where is the ambassador?",
+          updated_at: "2017-09-26T12:00:00Z"
+        })
     @room = helper.createRoom()
     @robot =
       respond: sinon.spy()
@@ -411,6 +423,15 @@ describe 'pivotal-tracker', ->
             ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
             ['alice', '@hubot show labels in project 7654321']
             ['hubot', '[\n \"mnt\",\n \"sanitation\"\n]']
+          ]
+    it 'sends a comment to a story', ->
+      @room.user.say('alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789').then =>
+        @room.user.say('alice', '@hubot comment on story 123456789: If this is a consular ship, then where is the ambassador?').then =>
+          expect(@room.messages).to.eql [
+            ['alice', '@hubot add me to pt project id: 7654321 using token: abcdefg123hijklmnop456789']
+            ['hubot', 'I have set your token to abcdefg123hijklmnop456789. Welcome to pt project 7654321! Your pt ID is 101']
+            ['alice', '@hubot comment on story 123456789: If this is a consular ship, then where is the ambassador?']
+            ['hubot', 'Comment added with ID: 300']
           ]
   #   it 'responds to hello', ->
   #     @room.user.say('alice', '@hubot hello').then =>
