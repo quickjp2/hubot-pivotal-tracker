@@ -271,7 +271,7 @@ module.exports = (robot) ->
           robot.logger.debug body
           msg.reply "story #{response['id']} is now #{response['current_state']} :thumbs_down:"
   # Let's comment!
-  robot.respond /comment on story (\d+):\s?(.*)/i, (msg) ->
+  robot.respond /comment on story (\d+):\s?(.*)/ig, (msg) ->
     storyID = msg.match[1]
     comment = msg.match[2]
     slackUserID = msg.message.user.id
